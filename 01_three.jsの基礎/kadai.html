@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>課題</title>
+  <style>
+    body{
+      margin:0;
+      background: url(./images/space.jpg) no-repeat center / cover;
+    }
+  </style>
+</head>
+<body>
+<script type="module">
+  import * as THREE from "https://cdn.skypack.dev/three@0.132";
+  import OrbitControls from "https://cdn.skypack.dev/threejs-orbit-controls";
+
+  const scene = new THREE.Scene();
+
+  const camera = new THREE.PerspectiveCamera(
+    50,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
+  camera.position.z = 500;
+
+  const renderer = new THREE.WebGLRenderer({ alpha: true });
+  renderer.setSize( window.innerWidth, window.innerHeight );
+  document.body.appendChild(renderer.domElement);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+
+  const texture = new THREE.TextureLoader().load("./images/wa.png");
+  const geometry = new THREE.TorusGeometry( 100, 10, 30, 200 );
+  const material = new THREE.MeshBasicMaterial( { map: texture } );
+  const torus = new THREE.Mesh( geometry, material );
+  scene.add( torus );
+
+  const texture2 = new THREE.TextureLoader().load("./images/hoshi.jpg");
+  const geometry2 = new THREE.SphereGeometry(60,64,32);
+  const material2 = new THREE.MeshBasicMaterial( { map: texture2 } );
+  const sphere = new THREE.Mesh( geometry2, material2 );
+  scene.add( sphere );
+
+  // const geometry3 = new THREE.CapsuleGeometry( 1, 1, 4, 8 );
+  // const material3 = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+  // const capsule3 = new THREE.Mesh( geometry3, material3 );
+  // scene.add( capsule );
+
+  const light = new THREE.DirectionalLight(0xffffff);
+  light.position.set(1, 1, 1);
+  scene.add(light);
+
+  function animate() {
+    torus.rotation.y = 0.005 * Date.now();
+    sphere.rotation.x = 0.005 * Date.now();
+    renderer.render(scene, camera);
+
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+</script>
+</body>
+</html>
