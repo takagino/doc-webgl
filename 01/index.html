@@ -25,7 +25,6 @@
       import * as THREE from 'three';
       import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-      console.log(OrbitControls); //three.jsのバージョンを表示
       //シーンの作成
       const scene = new THREE.Scene();
 
@@ -43,6 +42,7 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
+      // OrbitControlsの作成
       const controls = new OrbitControls(camera, renderer.domElement);
 
       //球体ジオメトリの追加
@@ -63,6 +63,7 @@
       light.position.set(1, 1, 1);
       scene.add(light);
 
+      //更新
       const update = () => {
         sphere.rotation.x += 0.01;
         sphere.rotation.y += 0.01;
@@ -74,17 +75,14 @@
 
       update();
 
-      //関数式の設定
+      //ウィンドウのリサイズに対応
       const onWindowResize = () => {
-        //レンダリングのサイズを再設定
         renderer.setSize(window.innerWidth, window.innerHeight);
 
-        //カメラのアスペクト比を調整
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
       };
 
-      //ウィンドウにリサイズイベントを登録
       window.addEventListener('resize', onWindowResize);
     </script>
   </body>
