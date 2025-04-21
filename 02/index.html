@@ -45,27 +45,36 @@
     camera.position.z = 3;
     scene.add(camera);
 
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ffff });
-    const box = new THREE.Mesh(geometry, material);
-    scene.add(box);
+    const group = new THREE.Group();
+    scene.add(group);
 
-    gui.add(box.position, 'x', -3, 3, 0.1);
+    /* オブジェクトの追加 */
 
-    // box.position.x = -0.7;
-    // box.position.y = -1;
-    // box.position.z = -1;
-    // //box.position.set(-0.7, 1, -1);
+    const box = new THREE.Mesh(
+      new THREE.BoxGeometry(1, 1, 1),
+      new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: false })
+    );
+    group.add(box);
 
-    // box.scale.x = 2;
+    const box2 = new THREE.Mesh(
+      new THREE.BoxGeometry(1, 1, 1),
+      new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: false })
+    );
+    group.add(box2);
+    box2.position.y = -1;
 
-    // box.rotation.x = (Math.PI / 180) * 45; //Math.PI = 180度
-    // box.rotation.x += (Math.PI / 180) * 45;
+    group.position.x = 1;
 
-    // console.log(box.position.length());
-    // console.log(box.position.distanceTo(camera.position));
-    // console.log(box.position.distanceTo(new THREE.Vector3(0, 0, 0)));
-    // console.log(box.position.normalize());
+    const guiPosition = gui.addFolder("Position");
+    guiPosition.add(box.position, 'x', -3, 3, 0.1).name("positionX");
+    guiPosition.add(box.position, 'y', -3, 3, 0.1).name("positionY");
+    guiPosition.add(box.position, 'z', -3, 3, 0.1).name("positionZ");
+
+    const guiMaterial = gui.addFolder("Material");
+    guiMaterial.add(box.material, 'wireframe');
+    guiMaterial.addColor(box.material, 'color');
+
+    /* ここまで　*/
 
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
