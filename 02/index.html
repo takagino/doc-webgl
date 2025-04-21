@@ -28,6 +28,9 @@
 
     const scene = new THREE.Scene();
 
+    const axesHelper = new THREE.AxesHelper(2);
+    scene.add(axesHelper);
+
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
     camera.position.z = 3;
     scene.add(camera);
@@ -36,6 +39,21 @@
     const material = new THREE.MeshBasicMaterial({ color: 0x00ffff });
     const box = new THREE.Mesh(geometry, material);
     scene.add(box);
+
+    box.position.x = -0.7;
+    box.position.y = -1;
+    box.position.z = -1;
+    //box.position.set(-0.7, 1, -1);
+
+    box.scale.x = 2;
+
+    box.rotation.x = (Math.PI / 180) * 45; //Math.PI = 180度
+    box.rotation.x += (Math.PI / 180) * 45;
+
+    console.log(box.position.length());
+    console.log(box.position.distanceTo(camera.position));
+    console.log(box.position.distanceTo(new THREE.Vector3(0, 0, 0)));
+    console.log(box.position.normalize());
 
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
