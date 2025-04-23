@@ -9,13 +9,6 @@
         margin: 0;
         overflow: hidden;
       }
-
-      canvas {
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: -1;
-      }
     </style>
   </head>
   <body>
@@ -37,26 +30,20 @@
       import Stats from 'stats';
       import GUI from 'lil-gui';
 
+      //シーン
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x333333);
+      scene.background = new THREE.Color(0x666666);
 
+      //カメラ
       const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
       camera.position.z = 5;
       scene.add(camera);
 
-      /* デバッグツール
-      ------------------ */
-      //AxesHelper
+      /* 各種デバッグツール
+      ------------------------------------ */
+      //軸ヘルパー
       // const axesHelper = new THREE.AxesHelper(2);
       // scene.add(axesHelper);
-
-      //CameraHelper
-      // const cameraHelper = new THREE.CameraHelper(camera);
-      // scene.add(cameraHelper);
-
-      //GridHelper;
-      // const gridHelper = new THREE.GridHelper(200, 10);
-      // scene.add(gridHelper);
 
       //Stats
       const stats = new Stats();
@@ -66,67 +53,62 @@
       //GUI
       const gui = new GUI();
 
-      /* ライトの設定
-      ------------------ */
-      //環境光
+      /* 各種ライト
+      ------------------------------------ */
+      //環境光の追加（色、強度）
       const ambientLight = new THREE.AmbientLight(0xffffff, 0);
       scene.add(ambientLight);
 
+      //GUIに登録
       const guiAmbient = gui.addFolder('周囲光');
       guiAmbient.addColor(ambientLight, 'color').name('色');
       guiAmbient.add(ambientLight, 'intensity', 0, 5).name('強度');
 
-      //環境光のヘルパーは無い
-      // const ambientLightHelper = new THREE.AmbientLightHelper(ambientLight);
-      // scene.add(ambientLightHelper);
-
-      //平行光
+      //平行光の追加（色、強度）
       const directionalLight = new THREE.DirectionalLight(0xff0000, 0);
       directionalLight.position.set(1, 1, 2);
       scene.add(directionalLight);
 
+      //GUIに登録
       const guiDirectional = gui.addFolder('平行光');
       guiDirectional.addColor(directionalLight, 'color').name('色');
       guiDirectional.add(directionalLight, 'intensity', 0, 5).name('強度');
 
-      // 平行光のヘルパー
       // const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight);
       // scene.add(directionalLightHelper);
 
-      //半球光
+      //半球光の追加（空の色、地面の色、強度）
       const hemisphereLight = new THREE.HemisphereLight(0x00ffff, 0xffff00, 3);
       scene.add(hemisphereLight);
 
+      //GUIに登録
       const guiHemisphere = gui.addFolder('半球光');
       guiHemisphere.addColor(hemisphereLight, 'color').name('空の色');
       guiHemisphere.addColor(hemisphereLight, 'groundColor').name('地面の色');
       guiHemisphere.add(hemisphereLight, 'intensity', 0, 5).name('強度');
 
-      // 半球光のヘルパー
       // const hemisphereLightHelper = new THREE.HemisphereLightHelper(hemisphereLight);
       // scene.add(hemisphereLightHelper);
 
-      /* テキストの表示
-      ------------------ */
+      /* グループ化
+      ------------------------------------ */
       const group = new THREE.Group();
       scene.add(group);
 
-      //フォントの読み込み
-      const fontLoader = new FontLoader();
-
-      let text = null;
-      let textGeometry = null;
-      const material = new THREE.MeshStandardMaterial({ color: 0xffffff });
-
+      //桁数を揃える関数
       const leftFillNum = (num) => {
         return num.toString().padStart(2, '0');
       };
 
-      const drawTime = (font) => {
+      const fontLoader = new FontLoader();
+      let text = null;
+      let material = null;
+      let textGeometry = null;
+
+      const getTime = (font) => {
         group.remove(text);
-        if (textGeometry) {
-          textGeometry.dispose();
-        }
+        if (material) material.dispose();
+        if (textGeometry) textGeometry.dispose();
 
         const now = new Date();
         const hour = leftFillNum(now.getHours());
@@ -135,9 +117,10 @@
         const milliSecond = now.getMilliseconds();
         const currentTime = `${hour}:${minute}:${second}`;
 
+        material = new THREE.MeshStandardMaterial({ color: 0xffffff });
         textGeometry = new TextGeometry(currentTime, {
           font: font,
-          size: 1,
+          size: 0.5,
           depth: 0.5,
           bevelEnabled: true,
           bevelThickness: 0.03,
@@ -146,20 +129,22 @@
           bevelSegments: 5,
         });
         textGeometry.center();
-
         text = new THREE.Mesh(textGeometry, material);
         group.add(text);
 
-        setTimeout(drawTime, 1000 - milliSecond, font);
+        setTimeout(getTime, 1000 - milliSecond, font);
       };
 
       fontLoader.load('./font/Roboto_Regular.json', (font) => {
-        setTimeout(drawTime, 10, font);
+        getTime(font);
       });
 
       //オブジェクト追加
       for (let i = 0; i < 100; i++) {
-        const box = new THREE.Mesh(new THREE.BoxGeometry(), material);
+        const box = new THREE.Mesh(
+          new THREE.BoxGeometry(),
+          new THREE.MeshStandardMaterial({ color: 0xffffff })
+        );
 
         box.position.x = (Math.random() - 0.5) * 10;
         box.position.y = (Math.random() - 0.5) * 10;
@@ -177,23 +162,20 @@
       document.body.appendChild(renderer.domElement);
       renderer.render(scene, camera);
 
-      //コントロール
+      //マウスコントロール
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
 
       //更新
-      const clock = new THREE.Clock();
-
       const update = () => {
         stats.begin();
+
+        group.rotation.x += 0.005;
+        group.rotation.y += 0.005;
+        group.rotation.z += 0.005;
+
         renderer.render(scene, camera);
         controls.update();
-
-        const elapsedTime = clock.getElapsedTime();
-        group.rotation.y = elapsedTime * 0.2;
-        group.rotation.x = elapsedTime * 0.2;
-        group.rotation.z = elapsedTime * 0.2;
-
         stats.end();
         window.requestAnimationFrame(update);
       };
