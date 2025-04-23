@@ -74,7 +74,7 @@
 
       const guiAmbient = gui.addFolder('周囲光');
       guiAmbient.addColor(ambientLight, 'color').name('色');
-      guiAmbient.add(ambientLight, 'intensity', 0, 5).name('明るさ');
+      guiAmbient.add(ambientLight, 'intensity', 0, 5).name('強度');
 
       //環境光のヘルパーは無い
       // const ambientLightHelper = new THREE.AmbientLightHelper(ambientLight);
@@ -87,7 +87,7 @@
 
       const guiDirectional = gui.addFolder('平行光');
       guiDirectional.addColor(directionalLight, 'color').name('色');
-      guiDirectional.add(directionalLight, 'intensity', 0, 5).name('明るさ');
+      guiDirectional.add(directionalLight, 'intensity', 0, 5).name('強度');
 
       // 平行光のヘルパー
       // const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight);
@@ -100,7 +100,7 @@
       const guiHemisphere = gui.addFolder('半球光');
       guiHemisphere.addColor(hemisphereLight, 'color').name('空の色');
       guiHemisphere.addColor(hemisphereLight, 'groundColor').name('地面の色');
-      guiHemisphere.add(hemisphereLight, 'intensity', 0, 5).name('明るさ');
+      guiHemisphere.add(hemisphereLight, 'intensity', 0, 5).name('強度');
 
       // 半球光のヘルパー
       // const hemisphereLightHelper = new THREE.HemisphereLightHelper(hemisphereLight);
