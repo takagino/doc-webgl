@@ -79,10 +79,22 @@
         const group = new THREE.Group();
         scene.add(group);
 
+        const leftFillNum = (num) => {
+            return num.toString().padStart(2, '0');
+        };
+
         const fontLoader = new FontLoader();
         fontLoader.load('./font/helvetiker_regular.typeface.json', (font) => {
+
+            const now = new Date();
+            const hour = leftFillNum(now.getHours());
+            const minute = leftFillNum(now.getMinutes());
+            const second = leftFillNum(now.getSeconds());
+            const milliSecond = now.getMilliseconds();
+            const currentTime = `${hour}:${minute}:${second}`;
+
             const material = new THREE.MeshStandardMaterial({ color: 0xffffff });
-            const textGeometry = new TextGeometry("Hello three.js!", {
+            const textGeometry = new TextGeometry(currentTime, {
                 font: font,
                 size: 0.5,
                 depth: 0.2,
