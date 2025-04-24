@@ -33,6 +33,7 @@
         import GUI from 'lil-gui';
 
         const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xffffff);
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
         camera.position.z = 5;
@@ -88,7 +89,7 @@
         let textGeometry = null;
 
         const getTime = (font) => {
-            scene.remove(text);
+            group.remove(text);
 
             if (material) material.dispose();
             if (textGeometry) textGeometry.dispose();
@@ -115,9 +116,9 @@
             textGeometry.center();
 
             text = new THREE.Mesh(textGeometry, material);
-            scene.add(text);
+            group.add(text);
 
-            setTimeout(getTime, 1000, font);
+            setTimeout(getTime, 1000 - milliSecond, font);
         }
 
         const fontLoader = new FontLoader();
@@ -125,6 +126,23 @@
             getTime(font);
             console.log(font);
         });
+
+        //オブジェクト追加
+        for (let i = 0; i < 100; i++) {
+            const box = new THREE.Mesh(
+                new THREE.BoxGeometry(),
+                new THREE.MeshStandardMaterial({ color: 0xffffff })
+            );
+
+            box.position.x = (Math.random() - 0.5) * 10;
+            box.position.y = (Math.random() - 0.5) * 10;
+            box.position.z = (Math.random() - 0.5) * 10;
+            box.rotation.x = Math.random() * Math.PI;
+            box.rotation.y = Math.random() * Math.PI;
+            const scale = Math.random();
+            box.scale.set(scale, scale, scale);
+            group.add(box);
+        }
 
         const renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -136,6 +154,11 @@
 
         const update = () => {
             stats.begin();
+
+            group.rotation.x += 0.005;
+            group.rotation.y += 0.005;
+            group.rotation.z += 0.005;
+
             renderer.render(scene, camera);
             controls.update();
             stats.end();
