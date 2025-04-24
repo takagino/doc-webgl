@@ -28,6 +28,7 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+        import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
         import Stats from 'stats';
         import GUI from 'lil-gui';
 
@@ -51,6 +52,20 @@
 
         const fontLoader = new FontLoader();
         fontLoader.load('./font/helvetiker_regular.typeface.json', (font) => {
+            const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const textGeometry = new TextGeometry("Hello three.js!", {
+                font: font,
+                size: 0.5,
+                depth: 0.5,
+                bevelEnabled: true,
+                bevelThickness: 0.03,
+                bevelSize: 0.02,
+                bevelOffset: 0,
+                bevelSegments: 5,
+            });
+            const text = new THREE.Mesh(textGeometry, material);
+            scene.add(text);
+
             console.log(font);
         });
 
