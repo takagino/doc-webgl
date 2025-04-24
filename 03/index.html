@@ -83,8 +83,8 @@
             return num.toString().padStart(2, '0');
         };
 
-        const fontLoader = new FontLoader();
-        fontLoader.load('./font/helvetiker_regular.typeface.json', (font) => {
+        const getTime = (font) => {
+            console.log("getTime");
 
             const now = new Date();
             const hour = leftFillNum(now.getHours());
@@ -110,6 +110,12 @@
             const text = new THREE.Mesh(textGeometry, material);
             scene.add(text);
 
+            setTimeout(getTime, 1000, font);
+        }
+
+        const fontLoader = new FontLoader();
+        fontLoader.load('./font/helvetiker_regular.typeface.json', (font) => {
+            getTime(font);
             console.log(font);
         });
 
