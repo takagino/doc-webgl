@@ -83,8 +83,15 @@
             return num.toString().padStart(2, '0');
         };
 
+        let text = null;
+        let material = null;
+        let textGeometry = null;
+
         const getTime = (font) => {
-            console.log("getTime");
+            scene.remove(text);
+
+            if (material) material.dispose();
+            if (textGeometry) textGeometry.dispose();
 
             const now = new Date();
             const hour = leftFillNum(now.getHours());
@@ -93,8 +100,8 @@
             const milliSecond = now.getMilliseconds();
             const currentTime = `${hour}:${minute}:${second}`;
 
-            const material = new THREE.MeshStandardMaterial({ color: 0xffffff });
-            const textGeometry = new TextGeometry(currentTime, {
+            material = new THREE.MeshStandardMaterial({ color: 0xffffff });
+            textGeometry = new TextGeometry(currentTime, {
                 font: font,
                 size: 0.5,
                 depth: 0.2,
@@ -107,7 +114,7 @@
 
             textGeometry.center();
 
-            const text = new THREE.Mesh(textGeometry, material);
+            text = new THREE.Mesh(textGeometry, material);
             scene.add(text);
 
             setTimeout(getTime, 1000, font);
