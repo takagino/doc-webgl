@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>デジタル時計</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <script type="importmap">
+          {
+            "imports": {
+              "three": "https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js",
+              "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/",
+              "stats": "https://cdn.skypack.dev/stats.js.fps",
+              "lil-gui": "https://cdn.jsdelivr.net/npm/lil-gui@0.20/+esm"
+            }
+          }
+        </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+        import Stats from 'stats';
+        import GUI from 'lil-gui';
+
+        const scene = new THREE.Scene();
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
+        camera.position.z = 5;
+        scene.add(camera);
+
+        const axesHelper = new THREE.AxesHelper(2);
+        scene.add(axesHelper);
+
+        const stats = new Stats();
+        stats.showPanel(0);
+        document.body.appendChild(stats.dom);
+
+        const gui = new GUI();
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const fontLoader = new FontLoader();
+        fontLoader.load('./font/helvetiker_regular.typeface.json', (font) => {
+            console.log(font);
+        });
+
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        renderer.render(scene, camera);
+
+        const update = () => {
+            stats.begin();
+            renderer.render(scene, camera);
+            stats.end();
+            window.requestAnimationFrame(update);
+        };
+
+        update();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>
