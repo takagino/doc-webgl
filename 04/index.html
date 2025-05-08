@@ -66,22 +66,25 @@
         const vertices = new Float32Array(count * 3);
 
         for (let i = 0; i < count * 3; i++) {
-            vertices[i] = Math.random();
+            vertices[i] = (Math.random() - 0.5) * 10;
         }
 
         console.log(vertices);
 
         bufferGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
 
+        const pointsMaterial = new THREE.PointsMaterial({
+            size: 0.05,
+            sizeAttenuation: true,
+            color: 0xff0fff,
+        });
         const particles = new THREE.Points(
             bufferGeometry,
-            new THREE.PointsMaterial({
-                size: 0.05,
-                sizeAttenuation: true,
-                color: 0xff0fff,
-            })
+            pointsMaterial
         );
         scene.add(particles);
+
+        gui.add(pointsMaterial, 'size', 0.01, 0.5).name('パーティクルサイズ').step(0.01);
 
 
         //レンダラー
