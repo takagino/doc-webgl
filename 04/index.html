@@ -60,6 +60,9 @@
         );
         scene.add(sphere);
 
+        //テクスチャの読み込み
+        const texture = new THREE.TextureLoader().load("./textures/10.png");
+
         //パーティクル
         const bufferGeometry = new THREE.BufferGeometry();
         const count = 2000;
@@ -77,6 +80,9 @@
             size: 0.05,
             sizeAttenuation: true,
             color: 0xff0fff,
+            alphaMap: texture,
+            transparent: true,
+            depthWrite: false,
         });
         const particles = new THREE.Points(
             bufferGeometry,
@@ -85,7 +91,7 @@
         scene.add(particles);
 
         gui.add(pointsMaterial, 'size', 0.01, 0.5).name('パーティクルサイズ').step(0.01);
-
+        gui.addColor(pointsMaterial, 'color').name('パーティクルカラー');
 
         //レンダラー
         const renderer = new THREE.WebGLRenderer();
