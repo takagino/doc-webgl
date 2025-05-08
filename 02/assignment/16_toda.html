@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ロボット課題</title>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <script type="importmap">
+        {
+            "imports":{
+                "three":"https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/",
+                "stats":"https://cdn.skypack.dev/stats.js.fps",
+                "lil-gui":"https://cdn.jsdelivr.net/npm/lil-gui@0.20/+esm"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import *as THREE from "three";
+        import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+        import Stats from "stats";
+        import GUI from "lil-gui";
+
+        //----------エリアの作成エリア----------
+
+        //盤上の作成
+        const scene = new THREE.Scene();
+
+        //カメラを作成
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
+        camera.position.z = 3;
+        //盤上にカメラを配置
+        scene.add(camera);
+
+        //補助線の作成
+        const auxiliary = new THREE.AxesHelper(2);
+
+        //FPSの作成
+        const stats = new Stats();
+        stats.showPanel(0);
+        document.body.appendChild(stats.dom);
+
+        //guiの作成
+        const gui = new GUI();
+
+        //----------物体の作成エリア----------
+
+        const paramName = ["頭", "胴体", "足"];
+
+        //グループの用意
+        const group = new THREE.Group();
+        //盤上に配置--(メッシュ、補助線)
+        scene.add(group, auxiliary);
+
+        //ジオメトリの作成
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const geometry2 = new THREE.BoxGeometry(.2, 1, .2);
+        const geometry3 = new THREE.SphereGeometry(.2, 32, 32);
+        const geometry4 = new THREE.ConeGeometry(1, 1, 32);
+        //マテリアルの作成
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const material2 = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+        const material3 = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const material4 = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+
+        //初期宣言
+        let cube = [];
+        let leg;
+        let arm = [];
+        let eyes = [];
+
+        //メッシュの作成
+        //メイン部分を作成
+        for (let i = 0; i < 2; i++) {
+            cube[i] = new THREE.Mesh(geometry, material);
+            //グループに追加
+            group.add(cube[i]);
+        }
+
+        //足の作成
+        leg = new THREE.Mesh(geometry4, material4);
+        group.add(leg);
+
+        //アームの作成
+        for (let i = 0; i < 2; i++) {
+            //アームの作成
+            arm[i] = new THREE.Mesh(geometry2, material2);
+            arm[i].position.x = -.7 + (i * 1.4);
+            arm[i].position.y = .7;
+            //グループに追加
+            group.add(arm[i]);
+
+            //目の作成
+            eyes[i] = new THREE.Mesh(geometry3, material3);
+            eyes[i].position.x = -.3 + (i * .6);
+            eyes[i].position.y = 1.2;
+            eyes[i].position.z = .4;
+
+            group.add(eyes[i]);
+        }
+
+        //GUIの項目を作成
+        gui.add(material, "wireframe");
+        //posフォルダーを作成して項目を登録。
+        const guiPos = gui.addFolder("全体")
+        guiPos.add(group.position, "x", -3, 3, 0.1).name("X");
+        guiPos.add(group.position, "y", -3, 3, 0.1).name("Y");
+        guiPos.add(group.position, "z", -3, 3, 0.1).name("Z");
+
+
+        cube.forEach((mesh, index) => {
+            //それぞれの位置を識別するフォルダーを作成
+            const type = gui.addFolder(paramName[index]);
+
+            type.add(mesh.position, "x", -3, 3, 0.1).name("X");
+            type.add(mesh.position, "y", -3, 3, 0.1).name("Y");
+            type.add(mesh.position, "z", -3, 3, 0.1).name("Z");
+            type.addColor(mesh.material, "color").name("色");
+        })
+
+        //足の位置を識別するフォルダーを作成
+        const legPos = gui.addFolder("足");
+        legPos.add(leg.position, "x", -3, 3, 0.1).name("X");
+        legPos.add(leg.position, "y", -3, 3, 0.1).name("y");
+        legPos.add(leg.position, "z", -3, 3, 0.1).name("z");
+        legPos.addColor(leg.material, "color").name("目の色");
+
+        //それぞれの初期値を作成
+        cube.forEach((mesh, index) => {
+            mesh.position.x = 0;
+            //真ん中にするため-1している。
+            mesh.position.y = index * 1;
+            mesh.position.z = 0;
+        })
+
+        //アニメーションの作成
+        let shakeNum = 0.03;
+        const armShake = () => {
+            arm.forEach((mesh, index) => {
+                mesh.rotation.x += shakeNum;
+            })
+        }
+
+        //レンダラーの作成
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+
+        //----------更新処理---------
+        const update = () => {
+            stats.begin();
+            stats.end();
+
+            armShake();
+
+            renderer.render(scene, camera);
+
+            //フレームの更新に邪魔されないように
+            //requestAnimationFrameを使用
+            window.requestAnimationFrame(update);
+        }
+
+        update();
+    </script>
+
+</body>
+
+</html>

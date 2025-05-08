@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>02_challenge</title>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <script type="importmap">
+                {
+            "imports":{
+                "three": "https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/",
+                "stats": "https://cdn.skypack.dev/stats.js.fps",
+                "lil-gui": "https://cdn.jsdelivr.net/npm/lil-gui@0.20/+esm"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import Stats from 'stats';
+        import GUI from 'lil-gui';
+
+        //シーン
+        const scene = new THREE.Scene();
+
+        //軸ヘルパー
+        const axesHelper = new THREE.AxesHelper(2);
+        scene.add(axesHelper);
+
+        //Stats
+        const stats = new Stats();
+        stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+        document.body.appendChild(stats.dom);
+
+        // GUIの追加
+        const gui = new GUI();
+
+        //カメラ
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
+        camera.position.z = 3;
+        scene.add(camera);
+
+        // グループの追加
+        const group = new THREE.Group();
+        scene.add(group);
+        group.position.y = 1;
+
+        //オブジェクト
+        const box = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1),
+            new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: false }));
+        box.scale.x = 1.5;
+        group.add(box);
+
+        const capsule = new THREE.Mesh(new THREE.CapsuleGeometry(.5, .8, 10, 20),
+            new THREE.MeshBasicMaterial({ color: 0x000fff, wireframe: false }));
+        group.add(capsule);
+        capsule.position.y = -1.2;
+
+        const cone = new THREE.Mesh(new THREE.ConeGeometry(.2, .4, 5),
+            new THREE.MeshBasicMaterial({ color: 0xf000ff, wireframe: false }));
+        group.add(cone);
+        cone.position.x = .25;
+        cone.position.y = -2;
+
+        const cone2 = new THREE.Mesh(new THREE.ConeGeometry(.2, .4, 5),
+            new THREE.MeshBasicMaterial({ color: 0xf000ff, wireframe: false }));
+        group.add(cone2);
+        cone2.position.x = -.25;
+        cone2.position.y = -2;
+
+        const sphere = new THREE.Mesh(new THREE.SphereGeometry(.2, .4, .5),
+            new THREE.MeshBasicMaterial({ color: 0xf000ff, wireframe: false }));
+        group.add(sphere);
+
+        // GUIの追加
+        const guiGroupPosition = gui.addFolder('GroupPosition');
+        const guiBoxPosition = gui.addFolder('BoxPosition');
+        const guicapsulePosition = gui.addFolder('CapsulePosition');
+        const guiconePosition = gui.addFolder('ConePosition');
+        const guicone2Position = gui.addFolder('Cone2Position');
+
+        guiGroupPosition.add(group.position, 'x', -3, 3, .01).name("positionX");
+        guiGroupPosition.add(group.position, 'y', -3, 3, .01).name("positionY");
+        guiGroupPosition.add(group.position, 'z', -3, 3, .01).name("positionZ");
+
+        guiBoxPosition.add(box.position, 'x', -3, 3, .01).name("positionX");
+        guiBoxPosition.add(box.position, 'y', -3, 3, .01).name("positionY");
+        guiBoxPosition.add(box.position, 'z', -3, 3, .01).name("positionXZ");
+
+        guicapsulePosition.add(capsule.position, 'x', -3, 3, .01).name("positionX");
+        guicapsulePosition.add(capsule.position, 'y', -3, 3, .01).name("positionY");
+        guicapsulePosition.add(capsule.position, 'z', -3, 3, .01).name("positionXZ");
+
+        guiconePosition.add(cone.position, 'x', -3, 3, .01).name("positionX");
+        guiconePosition.add(cone.position, 'y', -3, 3, .01).name("positionY");
+
+        guicone2Position.add(cone2.position, 'x', -3, 3, .01).name("positionX");
+
+        //レンダラー
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        renderer.render(scene, camera);
+
+        //更新
+        const update = () => {
+            stats.begin();
+            renderer.render(scene, camera);
+            stats.end();
+
+            window.requestAnimationFrame(update);
+        };
+
+        update();
+    </script>
+</body>
+
+</html>

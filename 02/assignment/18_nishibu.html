@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>02_オブジェクトの変換</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/",
+            "stats": "https://cdn.skypack.dev/stats.js.fps",
+            "lil-gui": "https://cdn.jsdelivr.net/npm/lil-gui@0.20/+esm"
+          }
+        }
+      </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import Stats from 'stats';
+        import GUI from 'lil-gui';
+
+        const scene = new THREE.Scene();
+
+        const axesHelper = new THREE.AxesHelper();
+        scene.add(axesHelper);
+
+        const stats = new Stats();
+        stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+        document.body.appendChild(stats.dom);
+
+        const gui = new GUI();
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
+        camera.position.z = 3;
+        scene.add(camera);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        /* オブジェクトの追加 */
+
+        /*頭*/
+        const box = new THREE.Mesh(
+            new THREE.BoxGeometry(1.5, 1, 1)
+        );
+        group.add(box);
+        box.position.y = 0.6;
+
+        /*首*/
+        const box2 = new THREE.Mesh(
+            new THREE.CapsuleGeometry(-0.3, 0.5, 5, 100)
+        );
+        group.add(box2);
+        box2.position.x = 0;
+        box2.position.y = 0;
+
+        /*目*/
+        const box3 = new THREE.Mesh(
+            new THREE.CircleGeometry(0.1, 32),
+            new THREE.MeshBasicMaterial({ color: 0x4acad3 })
+        );
+        group.add(box3);
+        box3.position.x = -0.2;
+        box3.position.y = 0.6;
+        box3.position.z = 1;
+
+        const box4 = new THREE.Mesh(
+            new THREE.CircleGeometry(0.1, 32),
+            new THREE.MeshBasicMaterial({ color: 0x0e4286 })
+        );
+        group.add(box4);
+        box4.position.x = 0.2;
+        box4.position.y = 0.6;
+        box4.position.z = 1;
+
+        const box5 = new THREE.Mesh(
+            new THREE.CircleGeometry(0.04, 32),
+            new THREE.MeshBasicMaterial({ color: 0xffffff })
+        );
+        group.add(box5);
+        box5.position.x = -0.2;
+        box5.position.y = 0.6;
+        box5.position.z = 1.1;
+
+
+        const box6 = new THREE.Mesh(
+            new THREE.CircleGeometry(0.04, 32),
+            new THREE.MeshBasicMaterial({ color: 0xffffff })
+        );
+        group.add(box6);
+        box6.position.x = 0.19;
+        box6.position.y = 0.63;
+        box6.position.z = 1;
+
+        /*口*/
+        const box7 = new THREE.Mesh(
+            new THREE.BoxGeometry(0.6, 0.15, 0),
+            new THREE.MeshBasicMaterial({ color: 0xdfc620 })
+        );
+        group.add(box7);
+        box7.position.x = 0;
+        box7.position.y = 0.3;
+        box7.position.z = 1;
+
+        /*ほっぺ*/
+        const box8 = new THREE.Mesh(
+            new THREE.CapsuleGeometry(0.1, -0.01, 100, 50),
+            new THREE.MeshBasicMaterial({ color: 0xe5437b })
+        );
+        group.add(box8);
+        box8.position.x = 0.4;
+        box8.position.y = 0.5;
+        box8.position.z = 1;
+
+        const box9 = new THREE.Mesh(
+            new THREE.CapsuleGeometry(0.1, -0.01, 100, 50),
+            new THREE.MeshBasicMaterial({ color: 0xe5437b })
+        );
+        group.add(box9);
+        box9.position.x = -0.4;
+        box9.position.y = 0.5;
+        box9.position.z = 1;
+
+        /*耳*/
+        const box10 = new THREE.Mesh(
+            new THREE.ConeGeometry(0.4, 1, 20),
+            new THREE.MeshBasicMaterial({ color: 0xffffff })
+        );
+        group.add(box10);
+        box10.position.x = -0.4;
+        box10.position.y = 1.4;
+
+        const box11 = new THREE.Mesh(
+            new THREE.ConeGeometry(0.4, 1, 20),
+            new THREE.MeshBasicMaterial({ color: 0xffffff })
+        );
+        group.add(box11);
+        box11.position.x = 0.4;
+        box11.position.y = 1.4;
+
+        const box12 = new THREE.Mesh(
+            new THREE.BoxGeometry(1, 1, 1)
+        );
+        group.add(box12);
+        box12.position.y = -0.6;
+
+        const box13 = new THREE.Mesh(
+            new THREE.BoxGeometry(0.25, 1.5, 1),
+            new THREE.MeshBasicMaterial({ color: 0xada9a9 })
+        );
+        group.add(box13);
+        box13.position.x = -0.2;
+        box13.position.y = -0.9;
+        box13.position.z = -0.1;
+
+        const box14 = new THREE.Mesh(
+            new THREE.BoxGeometry(0.25, 1.5, 1),
+            new THREE.MeshBasicMaterial({ color: 0xada9a9 })
+        );
+        group.add(box14);
+        box14.position.x = 0.2;
+        box14.position.y = -0.9;
+        box14.position.z = -0.1;
+
+        const box15 = new THREE.Mesh(
+            new THREE.BoxGeometry(1, 0.2, 0),
+            new THREE.MeshBasicMaterial({ color: 0xada9a9 })
+        );
+        group.add(box15);
+        box15.position.x = 0.9;
+        box15.position.y = -0.4;
+
+        const box16 = new THREE.Mesh(
+            new THREE.BoxGeometry(1, 0.2, 0),
+            new THREE.MeshBasicMaterial({ color: 0xada9a9 })
+        );
+        group.add(box16);
+        box16.position.x = -0.9;
+        box16.position.y = -0.4;
+
+        group.position.x = 0;
+
+        const guiPosition = gui.addFolder("Position");
+        guiPosition.add(box.position, 'x', -3, 3, 0.1).name("positionX");
+        guiPosition.add(box.position, 'y', -3, 3, 0.1).name("positionY");
+        guiPosition.add(box.position, 'z', -3, 3, 0.1).name("positionZ");
+
+        const guiMaterial = gui.addFolder("Material");
+        guiMaterial.add(box.material, 'wireframe');
+        guiMaterial.addColor(box.material, 'color');
+
+        /* ここまで　*/
+
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        renderer.render(scene, camera);
+
+        const update = () => {
+            stats.begin();
+            renderer.render(scene, camera);
+            stats.end();
+
+            window.requestAnimationFrame(update);
+        };
+
+        update();
+    </script>
+</body>
+
+</html>

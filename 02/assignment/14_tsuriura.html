@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ロボット課題</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/",
+            "stats": "https://cdn.skypack.dev/stats.js.fps",
+            "lil-gui": "https://cdn.jsdelivr.net/npm/lil-gui@0.20/+esm"
+          }
+        }
+      </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import Stats from 'stats';
+        import GUI from 'lil-gui';
+
+        const scene = new THREE.Scene();
+
+        const axesHelper = new THREE.AxesHelper();
+        scene.add(axesHelper);
+
+        const stats = new Stats();
+        stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+        document.body.appendChild(stats.dom);
+
+        const gui = new GUI();
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
+        camera.position.z = 3;
+        scene.add(camera);
+
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+
+
+
+
+
+
+
+        // const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const box = new THREE.Mesh(new THREE.ConeGeometry(5, 20, 32), new THREE.MeshBasicMaterial({ color: 0x421fe0, wireframe: false }));
+        group.add(box);
+
+        const box2 = new THREE.Mesh(new THREE.TorusGeometry(10, 3, 16, 100), new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: false }));
+        group.add(box2);
+
+        const box3 = new THREE.Mesh(new THREE.ConeGeometry(5, 20, 32), new THREE.MeshBasicMaterial({ color: 0x5b1aff, wireframe: false }));
+        group.add(box3);
+
+        const box4 = new THREE.Mesh(new THREE.ConeGeometry(5, 20, 32), new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: false }));
+        group.add(box4);
+
+        const box5 = new THREE.Mesh(new THREE.ConeGeometry(5, 20, 32), new THREE.MeshBasicMaterial({ color: 0x5b1aff, wireframe: false }));
+        group.add(box5);
+
+        const box6 = new THREE.Mesh(new THREE.ConeGeometry(5, 20, 32), new THREE.MeshBasicMaterial({ color: 0x5b1aff, wireframe: false }));
+        group.add(box6);
+
+
+        gui.add(box.material, 'wireframe');
+        gui.addColor(box.material, 'color').onChange(() => {
+            console.log(box.material.color);
+        });
+
+        gui.addColor(box2.material, 'color').onChange(() => {
+            console.log(box2.material.color);
+        });
+
+        gui.add(box3.material, 'wireframe');
+
+        // const guiPosition = gui.addFolder('position');
+
+        // guiPosition.add(box.position, 'x', -3, 3, 0.1).name('positionX');
+        // guiPosition.add(box.position, 'y', -3, 3, 0.1).name('positionY');
+        // guiPosition.add(box.position, 'z', -3, 3, 0.1).name('positionZ');
+
+
+        //
+        box.scale.set(.07, .03, 0);
+        box.rotation.x = (Math.PI / 180) * 180; //Math.PI = 180度
+        box.position.y = .9;
+
+
+        ///
+        box2.scale.set(.07, .07, 0);
+        box2.position.y = -.4;
+
+        ////
+        box3.scale.set(.07, .02, 0);
+        box3.position.x = -.8;
+        box3.position.y = -1.2;
+
+        box3.rotation.y = (Math.PI / 180) * 30;
+
+        /////
+        box4.scale.set(.07, .02, 0);
+        box4.position.x = .8;
+        box4.position.y = -1.2;
+
+        box4.rotation.y = (Math.PI / 180) * 160;
+
+
+        /////
+        box5.scale.set(.07, .02, 0);
+        box5.position.x = 1;
+        box5.position.y = .3;
+
+        box5.rotation.x = (Math.PI / 180) * -150;
+
+        /////
+        box6.scale.set(.07, .02, 0);
+        box6.position.x = -1;
+        box6.position.y = .3;
+
+        box6.rotation.x = (Math.PI / 180) * -150;
+
+
+        const guiPosition2 = gui.addFolder('position');
+
+        guiPosition2.add(box2.position, 'x', -3, 3, 0.1).name('positionX');
+        guiPosition2.add(box2.position, 'y', -3, 3, 0.1).name('positionY');
+        guiPosition2.add(box2.position, 'z', -3, 3, 0.1).name('positionZ');
+
+
+        const guiMaterial = gui.addFolder('material');
+
+        guiMaterial.add(box.material, 'wireframe');
+        guiMaterial.addColor(box.material, 'color');
+
+        // box.position.x = -0.7;
+        // box.position.y = -1;
+        // box.position.z = -1;
+        // //box.position.set(-0.7, 1, -1);
+
+        // box.scale.x = 2;
+
+        // box.rotation.x = (Math.PI / 180) * 45; //Math.PI = 180度
+        // box.rotation.x += (Math.PI / 180) * 45;
+
+        // console.log(box.position.length());
+        // console.log(box.position.distanceTo(camera.position));
+        // console.log(box.position.distanceTo(new THREE.Vector3(0, 0, 0)));
+        // console.log(box.position.normalize());
+
+
+
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        renderer.render(scene, camera);
+
+        //マウスコントロール
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        const update = () => {
+            stats.begin();
+            renderer.render(scene, camera);
+            stats.end();
+
+            window.requestAnimationFrame(update);
+        };
+
+        update();
+    </script>
+</body>
+
+</html>
