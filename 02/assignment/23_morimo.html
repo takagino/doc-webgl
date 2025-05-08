@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>課題</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+
+  <body>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/",
+          "stats": "https://cdn.skypack.dev/stats.js.fps",
+          "lil-gui": "https://cdn.jsdelivr.net/npm/lil-gui@0.20/+esm"
+        }
+      }
+    </script>
+    <script type="module">
+      import * as THREE from "three";
+      import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+      import Stats from "stats";
+      import GUI from "lil-gui";
+
+      //シーン
+      const scene = new THREE.Scene();
+
+      //軸ヘルパー
+      const axesHelper = new THREE.AxesHelper(2);
+      scene.add(axesHelper);
+
+      //Stats
+      const stats = new Stats();
+      stats.showPanel(0);
+      document.body.appendChild(stats.dom);
+
+      //GUI
+      const gui = new GUI();
+
+      //カメラ
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight
+      );
+      camera.position.z = 3;
+      scene.add(camera);
+
+      //グループ
+      const group = new THREE.Group();
+      scene.add(group);
+
+      /* オブジェクトの追加 */
+      //頭
+      const head = new THREE.Mesh(
+        new THREE.BoxGeometry(1, 1, 1),
+        new THREE.MeshBasicMaterial({ color: 0x929292, wireframe: false })
+      );
+      group.add(head);
+      head.position.y = 1;
+      head.scale.x = 0.7;
+      head.scale.y = 0.7;
+
+      const antenna = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.05, 0.05, 0.5, 8),
+        new THREE.MeshBasicMaterial({ color: 0x48504f })
+      );
+      group.add(antenna);
+      antenna.position.y = 1.5;
+
+      //顔
+      const eye1 = new THREE.Mesh(
+        new THREE.BoxGeometry(0.05, 0.3, 0.05),
+        new THREE.MeshBasicMaterial({ color: 0x0ab7ea, wireframe: false })
+      );
+      group.add(eye1);
+      eye1.position.x = 0.18;
+      eye1.position.y = 1;
+      eye1.position.z = 0.5;
+
+      const eye2 = new THREE.Mesh(
+        new THREE.BoxGeometry(0.05, 0.3, 0.05),
+        new THREE.MeshBasicMaterial({ color: 0x0ab7ea, wireframe: false })
+      );
+      group.add(eye2);
+      eye2.position.x = -0.18;
+      eye2.position.y = 1;
+      eye2.position.z = 0.5;
+
+      //体
+      const body = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.6, 0.5, 1, 10),
+        new THREE.MeshBasicMaterial({ color: 0x929292, wireframe: false })
+      );
+      group.add(body);
+      body.scale.x = 1.3;
+      body.scale.y = 1.5;
+
+      const dia = new THREE.Mesh(
+        new THREE.OctahedronGeometry(0.2, 0),
+        new THREE.MeshBasicMaterial({ color: 0x0ab7ea, wireframe: false })
+      );
+      group.add(dia);
+      dia.position.z = 0.5;
+      dia.position.z = 0.6;
+
+      //左腕
+      const leftArm = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.2, 0.2, 1.5, 16),
+        new THREE.MeshBasicMaterial({ color: 0x48504f, wireframe: false })
+      );
+      group.add(leftArm);
+      leftArm.position.x = 0.9;
+      leftArm.rotation.z = (Math.PI / 180) * 25;
+
+      //右腕
+      const rightArm = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.2, 0.2, 1.5, 16),
+        new THREE.MeshBasicMaterial({ color: 0x48504f, wireframe: false })
+      );
+      group.add(rightArm);
+      rightArm.position.x = -0.9;
+      rightArm.rotation.z = (Math.PI / 180) * 155;
+
+      //左足
+      const leftFoot = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.2, 0.3, 1, 20),
+        new THREE.MeshBasicMaterial({ color: 0x48504f, wireframe: false })
+      );
+      group.add(leftFoot);
+      leftFoot.position.x = 0.4;
+      leftFoot.position.y = -1.2;
+
+      //右足
+      const rightFoot = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.2, 0.3, 1, 20),
+        new THREE.MeshBasicMaterial({ color: 0x48504f, wireframe: false })
+      );
+      group.add(rightFoot);
+      rightFoot.position.x = -0.4;
+      rightFoot.position.y = -1.2;
+
+      const guiPosition = gui.addFolder("Position");
+      guiPosition.add(group.position, "x", -3, 3, 0.1).name("positionX");
+      guiPosition.add(group.position, "y", -3, 3, 0.1).name("positionY");
+      guiPosition.add(group.position, "z", -3, 3, 0.1).name("positionZ");
+
+      // const guiMaterial = gui.addFolder("Material");
+      // guiMaterial.add(box.material, "wireframe");
+      // guiMaterial.addColor(box.material, "color");
+
+      /* ここまで　*/
+
+      //レンダラーの作成
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+      renderer.render(scene, camera);
+
+      //更新
+      const update = () => {
+        stats.begin();
+        renderer.render(scene, camera);
+        stats.end();
+
+        window.requestAnimationFrame(update);
+      };
+
+      update();
+    </script>
+  </body>
+</html>
