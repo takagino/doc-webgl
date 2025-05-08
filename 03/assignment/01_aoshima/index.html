@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>03</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/",
+          "stats": "https://cdn.skypack.dev/stats.js.fps",
+          "lil-gui": "https://cdn.jsdelivr.net/npm/lil-gui@0.20/+esm"
+        }
+      }
+    </script>
+    <script type="module">
+      import * as THREE from "three";
+      import { FontLoader } from "three/addons/loaders/FontLoader.js";
+      import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
+      import Stats from "stats";
+      import GUI from "lil-gui";
+      import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+      //①シーン
+      const scene = new THREE.Scene();
+
+      //②カメラ
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight
+      );
+      camera.position.z = 5;
+      scene.add(camera);
+
+      /* 各種デバッグツール
+      ------------------------------------ */
+      //軸ヘルパー
+      // const axesHelper = new THREE.AxesHelper(2);
+      // scene.add(axesHelper);
+
+      //Stats
+      const stats = new Stats();
+      stats.showPanel(0);
+      document.body.appendChild(stats.dom);
+
+      //GUI
+      const gui = new GUI();
+
+      /* グループ化
+      ------------------------------------ */
+      const group = new THREE.Group();
+
+      // 桁数を揃える
+      const leftFillNum = (num) => {
+        return num.toString().padStart(2, "0");
+      };
+
+      // 時間を取得して表示
+      let text = null;
+      let textGeometry = null;
+      let material = null;
+
+      const getTime = (font) => {
+        group.remove(text);
+        console.log("getTime");
+        // マテリアルとジオメトリの破棄
+        if (material) material.dispose;
+        if (textGeometry) textGeometry.dispose;
+        const now = new Date();
+        const hour = leftFillNum(now.getHours()); //関数で囲む
+        const minute = leftFillNum(now.getMinutes()); //関数で囲む
+        const second = leftFillNum(now.getSeconds()); //関数で囲む
+        const milliSecond = now.getMilliseconds();
+        const currentTime = `${hour}:${minute}:${second}`;
+
+        material = new THREE.MeshStandardMaterial({ color: 0xffffff });
+        textGeometry = new TextGeometry(currentTime, {
+          font: font,
+          size: 0.5,
+          depth: 0.2,
+          bevelEnabled: true,
+          bevelThickness: 0.1,
+          bevelSize: 0.01,
+          bevelOffset: 0,
+          bevelSegments: 5,
+        });
+        // センター揃えにする
+        textGeometry.center();
+        text = new THREE.Mesh(textGeometry, material);
+        group.add(text);
+        scene.add(group);
+        setTimeout(getTime, 1000 - milliSecond, font);
+      };
+
+      // フォントローダー(フォントを指定ディレクトリ内のjsonファイルから読み込んでいる)
+      const fontLoader = new FontLoader();
+      fontLoader.load(
+        // resource URL
+        "./font/Special Gothic Expanded One Regular.json",
+
+        // onLoad callback
+        function (font) {
+          getTime(font);
+        },
+
+        // onProgress callback
+        function (xhr) {
+          console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+        },
+
+        // onError callback
+        function (err) {
+          console.log("An error happened");
+        }
+      );
+
+      // フォント
+
+      // 光源の設定ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0);
+      scene.add(ambientLight);
+
+      //GUIに登録
+      const guiAmbient = gui.addFolder("周囲光");
+      guiAmbient.addColor(ambientLight, "color").name("色");
+      guiAmbient.add(ambientLight, "intensity", 0, 5).name("強度");
+
+      //平行光の追加（色、強度）
+      const directionalLight = new THREE.DirectionalLight(0x1ef6ae, 3);
+      directionalLight.position.set(1, 1, 5);
+      scene.add(directionalLight);
+
+      // const directionalLight2 = new THREE.DirectionalLight(0xff88ba, 3);
+      // directionalLight.position.set(0, 0, -1);
+      // scene.add(directionalLight2);
+
+      //GUIに登録
+      const guiDirectional = gui.addFolder("平行光");
+      guiDirectional.addColor(directionalLight, "color").name("色");
+      guiDirectional.add(directionalLight, "intensity", 0, 5).name("強度");
+      guiDirectional
+        .add(directionalLight.position, "x", -10, 10, 0.1)
+        .name("位置X");
+      guiDirectional
+        .add(directionalLight.position, "y", -10, 10, 0.1)
+        .name("位置Y");
+      guiDirectional
+        .add(directionalLight.position, "z", -10, 10, 0.1)
+        .name("位置Z");
+
+      guiDirectional
+        .add(directionalLight.rotation, "x", -180, 180, 1)
+        .name("回転X");
+      guiDirectional
+        .add(directionalLight.rotation, "y", -180, 180, 1)
+        .name("回転Y");
+      guiDirectional
+        .add(directionalLight.rotation, "z", -180, 180, 1)
+        .name("回転Z");
+      // 平行光のヘルパー
+      // const directionalLightHelper = new THREE.DirectionalLightHelper(
+      //   directionalLight
+      // );
+      // scene.add(directionalLightHelper);
+      // const directionalLightHelper2 = new THREE.DirectionalLightHelper(
+      //   directionalLight2
+      // );
+      // scene.add(directionalLightHelper2);
+      scene.background = new THREE.Color(0xfdff9e);
+
+      // 半球光
+      //半球光の追加（空の色、地面の色、強度）
+      const hemisphereLight = new THREE.HemisphereLight(0xff0066, 0x06d8f4, 3);
+      scene.add(hemisphereLight);
+
+      //GUIに登録
+      const guiHemisphere = gui.addFolder("半球光");
+      guiHemisphere.addColor(hemisphereLight, "color").name("空の色");
+      guiHemisphere.addColor(hemisphereLight, "groundColor").name("地面の色");
+      guiHemisphere.add(hemisphereLight, "intensity", 0, 5).name("強度");
+      // ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
+      let box;
+      //オブジェクト追加
+      for (let i = 0; i < 100; i++) {
+        let ran = Math.floor(Math.random() * 6);
+        if (ran < 2) {
+          box = new THREE.Mesh(
+            new THREE.BoxGeometry(),
+            new THREE.MeshStandardMaterial({ color: 0xffffff })
+          );
+          const scale = Math.random();
+          box.scale.set(scale, scale, scale);
+        } else if (ran < 5) {
+          class CustomSinCurve extends THREE.Curve {
+            constructor(scale = 1) {
+              super();
+              this.scale = scale;
+            }
+
+            getPoint(t, optionalTarget = new THREE.Vector3()) {
+              const tx = t * 3 - 1.5;
+              const ty = Math.sin(2 * Math.PI * t);
+              const tz = 0;
+
+              return optionalTarget.set(tx, ty, tz).multiplyScalar(this.scale);
+            }
+          }
+
+          const path = new CustomSinCurve(20);
+          const geometry = new THREE.TubeGeometry(path, 40, 1, 12, false);
+          const material = new THREE.MeshStandardMaterial({ color: 0xffffff });
+          box = new THREE.Mesh(geometry, material);
+          let scaleRandom = Math.random() * 5;
+          scaleRandom = scaleRandom * 0.015;
+          box.scale.set(scaleRandom, scaleRandom, scaleRandom);
+          // scene.add(mesh);
+        } else {
+          function createStarShape(radius = 5, points = 5) {
+            const shape = new THREE.Shape();
+            const step = (Math.PI * 2) / (points * 2); // 外角と内角交互に
+            const innerRadius = radius * 0.5; // 中心の小さい半径
+
+            for (let i = 0; i < points * 2; i++) {
+              const r = i % 2 === 0 ? radius : innerRadius;
+              const angle = i * step;
+              const x = Math.cos(angle) * r;
+              const y = Math.sin(angle) * r;
+              if (i === 0) {
+                shape.moveTo(x, y);
+              } else {
+                shape.lineTo(x, y);
+              }
+            }
+            shape.closePath();
+            return shape;
+          }
+
+          const starShape = createStarShape(5, 5);
+
+          const extrudeSettings = {
+            depth: 2, // 奥行き（Z軸方向）
+            bevelEnabled: true, // ぷっくり感を出す
+            bevelThickness: 1,
+            bevelSize: 0.5,
+            bevelSegments: 5,
+          };
+
+          const geometry = new THREE.ExtrudeGeometry(
+            starShape,
+            extrudeSettings
+          );
+          const material = new THREE.MeshStandardMaterial({
+            color: 0xffaaff,
+            roughness: 0.3,
+            metalness: 0.5,
+          });
+          box = new THREE.Mesh(geometry, material);
+          scene.add(box);
+          let scaleRandom = Math.random() * 8;
+          scaleRandom = scaleRandom * 0.015;
+          box.scale.set(scaleRandom, scaleRandom, scaleRandom);
+        }
+        box.position.x = (Math.random() - 0.5) * 10;
+        box.position.y = (Math.random() - 0.5) * 10;
+        box.position.z = (Math.random() - 0.5) * 10;
+        box.rotation.x = Math.random() * Math.PI;
+        box.rotation.y = Math.random() * Math.PI;
+
+        group.add(box);
+        console.log(ran);
+      }
+
+      //③レンダラー
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+      renderer.render(scene, camera);
+      const controls = new OrbitControls(camera, renderer.domElement);
+      // オブジェクト動かすためのやつ
+
+      //④更新
+      const update = () => {
+        stats.begin();
+        group.rotation.x += 0.005;
+        group.rotation.y += 0.005;
+        group.rotation.z += 0.005;
+        renderer.render(scene, camera);
+        controls.update();
+        stats.end();
+        window.requestAnimationFrame(update);
+      };
+
+      update();
+
+      // getTime();
+      //⑤ウィンドウリサイズ
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    </script>
+  </body>
+</html>

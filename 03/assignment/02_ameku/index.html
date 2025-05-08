@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>デジタル時計</title>
+  </head>
+  <body>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/",
+          "stats": "https://cdn.skypack.dev/stats.js.fps",
+          "lil-gui": "https://cdn.jsdelivr.net/npm/lil-gui@0.20/+esm"
+        }
+      }
+    </script>
+    <script type="module">
+      import * as THREE from "three";
+      import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+      import Stats from "stats";
+      import GUI from "lil-gui";
+
+      import { FontLoader } from "three/addons/loaders/FontLoader.js";
+      import { TextGeometry } from "three/addons/geometries/TextGeometry.js"; //追加
+
+      // ①シーン
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x8aceff);
+
+      //②カメラ
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight
+      );
+      camera.position.z = 5;
+      scene.add(camera);
+
+      /* 各種デバッグツール
+      ------------------------------------ */
+      // //軸ヘルパー
+      // const axesHelper = new THREE.AxesHelper(2);
+      // scene.add(axesHelper);
+
+      //Stats
+      const stats = new Stats();
+      stats.showPanel(0);
+      document.body.appendChild(stats.dom);
+
+      //GUI
+      const gui = new GUI();
+
+      //環境光の追加（色、強度）
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0);
+      scene.add(ambientLight);
+
+      //GUIに登録
+      const guiAmbient = gui.addFolder("周囲光");
+      guiAmbient.addColor(ambientLight, "color").name("色");
+      guiAmbient.add(ambientLight, "intensity", 0, 5).name("強度");
+
+      //平行光の追加（色、強度）
+      const directionalLight = new THREE.DirectionalLight(0xff5900, 0);
+      directionalLight.position.set(1, 1, 2);
+      scene.add(directionalLight);
+
+      //GUIに登録
+      const guiDirectional = gui.addFolder("平行光");
+      guiDirectional.addColor(directionalLight, "color").name("色");
+      guiDirectional.add(directionalLight, "intensity", 0, 5).name("強度");
+
+      // const directionalLightHelper = new THREE.DirectionalLightHelper(
+      //   directionalLight
+      // );
+      // scene.add(directionalLightHelper);
+
+      //半球光の追加（空の色、地面の色、強度）
+      const hemisphereLight = new THREE.HemisphereLight(0x1e00ff, 0xffff00, 3);
+      scene.add(hemisphereLight);
+
+      //GUIに登録
+      const guiHemisphere = gui.addFolder("半球光");
+      guiHemisphere.addColor(hemisphereLight, "color").name("空の色");
+      guiHemisphere.addColor(hemisphereLight, "groundColor").name("地面の色");
+      guiHemisphere.add(hemisphereLight, "intensity", 0, 5).name("強度");
+
+      // const hemisphereLightHelper = new THREE.HemisphereLightHelper(
+      //   hemisphereLight
+      // );
+      // scene.add(hemisphereLightHelper);
+      /* グループ化
+      ------------------------------------ */
+      const group = new THREE.Group();
+      scene.add(group);
+
+      //桁数を揃える関数
+      const leftFillNum = (num) => {
+        return num.toString().padStart(2, "0");
+      };
+
+      let text = null;
+      //同様に外で変数宣言
+      let material = null;
+      let textGeometry = null;
+
+      const getTime = (font) => {
+        group.remove(text);
+
+        //dispose() で破棄する
+        if (material) material.dispose();
+        if (textGeometry) textGeometry.dispose();
+        const now = new Date();
+        const hour = leftFillNum(now.getHours()); //関数で囲む
+        const minute = leftFillNum(now.getMinutes()); //関数で囲む
+        const second = leftFillNum(now.getSeconds()); //関数で囲む
+        const milliSecond = now.getMilliseconds();
+        const currentTime = `${hour}:${minute}:${second}`;
+
+        material = new THREE.MeshStandardMaterial({ color: 0xff3b9d });
+        textGeometry = new TextGeometry(currentTime, {
+          font: font,
+          size: 0.7,
+          depth: 0.2,
+          bevelEnabled: true,
+          bevelThickness: 0.03,
+          bevelSize: 0.01,
+          bevelOffset: 0,
+          bevelSegments: 5,
+        });
+        textGeometry.center(); //追加
+        text = new THREE.Mesh(textGeometry, material);
+        group.add(text);
+
+        setTimeout(getTime, 1000 - milliSecond, font); //値を渡す
+      };
+
+      const fontLoader = new FontLoader();
+      fontLoader.load(
+        "./font/Special Gothic Expanded One_Regular.json",
+        (font) => {
+          getTime(font); //値を渡す
+        }
+      );
+
+      //③レンダラー
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+      renderer.render(scene, camera);
+
+      //マウスコントロール
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+
+      //④更新
+      const update = () => {
+        stats.begin();
+
+        group.rotation.x += 0.001;
+        group.rotation.y += 0.001;
+        group.rotation.z += 0.001;
+
+        renderer.render(scene, camera);
+        controls.update(); //追加
+        stats.end();
+        window.requestAnimationFrame(update);
+      };
+
+      update();
+
+      //オブジェクト追加
+      for (let i = 0; i < 100; i++) {
+        const box = new THREE.Mesh(
+          new THREE.TorusGeometry(),
+          new THREE.MeshStandardMaterial({ color: 0xffff })
+        );
+
+        box.position.x = (Math.random() - 0.5) * 20;
+        box.position.y = (Math.random() - 0.5) * 20;
+        box.position.z = (Math.random() - 0.5) * 20;
+        box.rotation.x = Math.random() * Math.PI;
+        box.rotation.y = Math.random() * Math.PI;
+        const scale = Math.random();
+        box.scale.set(scale, scale, scale);
+        group.add(box);
+      }
+    </script>
+  </body>
+</html>
