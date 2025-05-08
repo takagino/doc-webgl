@@ -39,8 +39,8 @@
         scene.add(camera);
 
         //軸ヘルパー
-        const axesHelper = new THREE.AxesHelper(2);
-        scene.add(axesHelper);
+        // const axesHelper = new THREE.AxesHelper(2);
+        // scene.add(axesHelper);
 
         //Stats
         const stats = new Stats();
@@ -53,23 +53,9 @@
         //テクスチャの読み込み
         const texture = new THREE.TextureLoader().load("./textures/10.png");
 
-        //オブジェクト
-        const sphere = new THREE.Points(
-            new THREE.SphereGeometry(1, 16, 32),
-            new THREE.PointsMaterial({
-                size: 0.05,
-                color: 0xff0000,
-                alphaMap: texture,
-                transparent: true,
-                depthWrite: false,
-                blending: THREE.AdditiveBlending,
-            })
-        );
-        scene.add(sphere);
-
         //パーティクル
         const bufferGeometry = new THREE.BufferGeometry();
-        const count = 2000;
+        const count = 1000;
         const vertices = new Float32Array(count * 3);
         const colors = new Float32Array(count * 3);
 
@@ -112,8 +98,22 @@
         controls.enableDamping = true;
 
         //更新
+        const clock = new THREE.Clock();
+
         const update = () => {
             stats.begin();
+
+            const elapsedTime = clock.getElapsedTime();
+            console.log(Math.sin(elapsedTime));
+
+            for (let i = 0; i < count; i++) {
+                const i3 = i * 3;
+                const x = bufferGeometry.attributes.color.array[i3];
+                bufferGeometry.attributes.color.array[i3 + 1] = Math.sin(elapsedTime + x);
+            }
+
+            bufferGeometry.attributes.color.needsUpdate = true;
+
             renderer.render(scene, camera);
             controls.update();
             stats.end();
