@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>パーティクル</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/",
+        "stats": "https://cdn.skypack.dev/stats.js.fps",
+        "lil-gui": "https://cdn.jsdelivr.net/npm/lil-gui@0.20/+esm"
+      }
+    }
+  </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import Stats from 'stats';
+        import GUI from 'lil-gui';
+
+        // シーンとカメラ
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
+        camera.position.z = 10;
+        scene.add(camera);
+
+        // レンダラー
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // コントロール
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        // GUI
+        const gui = new GUI();
+
+        // Stats
+        const stats = new Stats();
+        stats.showPanel(0);
+        document.body.appendChild(stats.dom);
+
+        // テクスチャ
+        const texture = new THREE.TextureLoader().load('./textures/8.png');
+
+        // パーティクル
+        const count = 20000;
+        const positions = new Float32Array(count * 3);
+        const colors = new Float32Array(count * 3);
+
+        for (let i = 0; i < count * 3; i++) {
+            positions[i] = (Math.random() - 0.5) * 10;
+            colors[i] = Math.random();
+        }
+
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        // パーティクルマテリアル
+        const material = new THREE.PointsMaterial({
+            size: 0.2,
+            sizeAttenuation: true,
+            vertexColors: true,
+            alphaMap: texture,
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+        });
+
+        gui.add(material, 'size', 0.01, 0.5).name('パーティクルサイズ').step(0.01);
+        gui.addColor(material, 'color').name('基本色');
+
+        // パーティクルオブジェクト
+        const particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+
+        // 時間
+        const clock = new THREE.Clock();
+
+        // アニメーション
+        const update = () => {
+            stats.begin();
+
+            const elapsedTime = clock.getElapsedTime();
+            const positions = geometry.attributes.position.array;
+
+            for (let i = 0; i < count; i++) {
+                const i3 = i * 3;
+                const x = positions[i3];
+                const z = positions[i3 + 2];
+
+                const waveY = Math.sin(elapsedTime * 1.5 + x * 1.5);
+                const waveZ = Math.sin(elapsedTime * 1.0 + z * 1.5);
+
+                positions[i3 + 1] = waveY + waveZ;
+            }
+
+            geometry.attributes.position.needsUpdate = true;
+
+            controls.update();
+            renderer.render(scene, camera);
+            stats.end();
+            requestAnimationFrame(update);
+        };
+
+        update();
+
+        // リサイズ対応
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>

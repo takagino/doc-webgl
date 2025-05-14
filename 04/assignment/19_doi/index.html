@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>04課題</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+        }
+    </style>
+</head>
+
+<body>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/",
+            "stats": "https://cdn.skypack.dev/stats.js.fps",
+            "lil-gui": "https://cdn.jsdelivr.net/npm/lil-gui@0.20/+esm"
+        }
+    }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import Stats from 'stats';
+        import GUI from 'lil-gui';
+
+        // シーン
+        const scene = new THREE.Scene();
+
+        // カメラ
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.z = 20;
+        scene.add(camera);
+
+        // Stats
+        const stats = new Stats();
+        stats.showPanel(0);
+        document.body.appendChild(stats.dom);
+
+        // GUI
+        const gui = new GUI();
+
+        // テクスチャ読み込み
+        const texture = new THREE.TextureLoader().load("./textures/12.png");
+
+        // パラメータ
+        const param = {
+            count: 3000,
+            size: 0.15,
+            spin: 1.5,
+            branches: 5,
+            randomness: 0.5,
+            color: '#ffffff',
+        };
+
+        // GUIに登録
+        gui.add(param, 'size', 0.05, 0.5).step(0.01).name("サイズ");
+        gui.add(param, 'spin', 0, 5).step(0.1).name("渦の強さ");
+        gui.add(param, 'branches', 1, 10).step(1).name("分岐数");
+        gui.add(param, 'randomness', 0, 2).step(0.1).name("ランダムさ");
+        gui.addColor(param, 'color').name("色");
+
+        // パーティクル生成
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(param.count * 3);
+        const colors = new Float32Array(param.count * 3);
+
+        for (let i = 0; i < param.count; i++) {
+            const i3 = i * 3;
+            const radius = Math.random() * 10;
+            const spinAngle = radius * param.spin;
+            const branchAngle = (i % param.branches) / param.branches * Math.PI * 2;
+
+            const randomX = (Math.random() - 0.5) * param.randomness;
+            const randomY = (Math.random() - 0.5) * param.randomness * 0.5;
+            const randomZ = (Math.random() - 0.5) * param.randomness;
+
+            positions[i3] = Math.cos(branchAngle + spinAngle) * radius + randomX;
+            positions[i3 + 1] = randomY;
+            positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius + randomZ;
+
+            colors[i3] = Math.random();
+            colors[i3 + 1] = Math.random();
+            colors[i3 + 2] = Math.random();
+        }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        // マテリアル
+        const material = new THREE.PointsMaterial({
+            size: param.size,
+            vertexColors: true,
+            alphaMap: texture,
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending
+        });
+
+        // ポイント作成
+        const particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+
+        // レンダラー
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // カメラ操作
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        // アニメーション
+        const clock = new THREE.Clock();
+
+        const update = () => {
+            stats.begin();
+
+            const elapsed = clock.getElapsedTime();
+
+            particles.rotation.y += 0.001;
+
+            const pos = geometry.attributes.position.array;
+            for (let i = 0; i < param.count; i++) {
+                const i3 = i * 3;
+                const x = pos[i3];
+                pos[i3 + 1] += Math.sin(elapsed + x) * 0.001;
+            }
+
+            geometry.attributes.position.needsUpdate = true;
+
+            controls.update();
+            renderer.render(scene, camera);
+
+            stats.end();
+            requestAnimationFrame(update);
+        };
+
+        update();
+
+        // リサイズ対応
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>

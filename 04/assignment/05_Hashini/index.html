@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>パーティクル</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/",
+          "stats": "https://cdn.skypack.dev/stats.js.fps",
+          "lil-gui": "https://cdn.jsdelivr.net/npm/lil-gui@0.20/+esm"
+        }
+      }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import Stats from 'stats';
+        import GUI from 'lil-gui';
+
+        //シーン
+        const scene = new THREE.Scene();
+
+        //カメラ
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
+        camera.position.z = 5;
+        scene.add(camera);
+
+        //軸ヘルパー
+        const axesHelper = new THREE.AxesHelper(2);
+        scene.add(axesHelper);
+
+        //Stats
+        const stats = new Stats();
+        stats.showPanel(0);
+        document.body.appendChild(stats.dom);
+
+        //GUI
+        const gui = new GUI();
+        //テクスチャの読み込み
+        const texture = new THREE.TextureLoader().load("./textures/flower.png");
+
+
+        // //オブジェクト
+        // const heartShape = new THREE.Shape(
+        //     new THREE.heartShape(1, 16, 32),
+        //     new THREE.PointsMaterial({
+        //         size: 0.04,
+        //         color: 0xff0000,
+        //         alphaMap: texture,
+        //         transparent: true,
+        //         depthWhite: false,
+        //         blennding: THREE.AdditiveBlending,
+        //     })
+        // );
+        // scene.add(sphere);
+        // //you can add shape to center and make like point
+
+        const x = 0, y = 0;
+
+        const heartShape = new THREE.Shape();
+
+        heartShape.moveTo(x + 5, y + 5);
+        heartShape.bezierCurveTo(x + 5, y + 5, x + 4, y, x, y);
+        heartShape.bezierCurveTo(x - 6, y, x - 6, y + 7, x - 6, y + 7);
+        heartShape.bezierCurveTo(x - 6, y + 11, x - 3, y + 15.4, x + 5, y + 19);
+        heartShape.bezierCurveTo(x + 12, y + 15.4, x + 16, y + 11, x + 16, y + 7);
+        heartShape.bezierCurveTo(x + 16, y + 7, x + 16, y, x + 10, y);
+        heartShape.bezierCurveTo(x + 7, y, x + 5, y + 5, x + 5, y + 5);
+
+        const geometry = new THREE.ShapeGeometry(heartShape);
+        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.scale.set(0.07, 0.07, 0.07);
+        mesh.rotation.z = Math.PI;
+        mesh.position.set(0.5, 1, 0);
+        scene.add(mesh);
+
+
+
+
+        //パーティクル
+        const bufferGeometry = new THREE.BufferGeometry();
+        const count = 2000;
+        //add the bubble count here
+        const vertices = new Float32Array(count * 3);
+        //for文でランダムな値を代入
+        const colors = new Float32Array(count * 3);
+
+
+
+        for (let i = 0; i < count * 3; i++) {
+            vertices[i] = (Math.random() - 0.5) * 10;
+            //20 is what area you want
+            colors[i] = Math.random();
+
+        }
+        console.log(vertices);
+        //*3 is x,y,z
+
+        bufferGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+        bufferGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+
+        //メッシュ化
+        const PointsMaterial = new THREE.PointsMaterial({
+            size: 0.2,
+            sizeAttenuation: true,
+            vertexColors: true,
+            alphaMap: texture,
+            transparent: true,
+            depthWhite: false,
+            blennding: THREE.AdditiveBlending,
+        })
+
+        const particles = new THREE.Points(
+            bufferGeometry,
+            PointsMaterial
+
+        );
+        scene.add(particles);
+        gui.add(PointsMaterial, 'size', 0.01, 0.5).name('パーティクルサイズ').step(0.01);
+        gui.addColor(PointsMaterial, 'color').name('パーティクルカラー');
+
+
+
+
+
+
+
+        //レンダラー
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        renderer.render(scene, camera);
+
+        //マウスコントロール
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        const clock = new THREE.Clock();
+
+        //更新
+        const update = () => {
+            stats.begin();
+
+            const elapsedTime = clock.getElapsedTime();
+            console.log(elapsedTime);
+
+            //座標の設定
+            for (let i = 0; i < count; i++) {
+                const i3 = i * 5;
+                const x = bufferGeometry.attributes.position.array[i3];
+                const y = bufferGeometry.attributes.position.array[i3];
+                bufferGeometry.attributes.position.array[i3 + 1] = Math.sin(elapsedTime + x)
+                bufferGeometry.attributes.position.array[i3 + 1] = Math.sin(elapsedTime + x)
+                bufferGeometry.attributes.position.array[i3 + 1] = Math.sin(elapsedTime + y)
+
+
+
+
+            }
+
+            bufferGeometry.attributes.position.needsUpdate = true;
+
+            renderer.render(scene, camera);
+            controls.update();
+            stats.end();
+            window.requestAnimationFrame(update);
+        };
+
+        update();
+
+        //ウィンドウリサイズ
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>パーティクル〜アニメーション</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+
+    <script type="importmap">
+   {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.175.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.175.0/examples/jsm/",
+          "stats": "https://cdn.skypack.dev/stats.js.fps",
+          "lil-gui": "https://cdn.jsdelivr.net/npm/lil-gui@0.20/+esm"
+        }
+      }
+    </script>
+
+
+    <script type="module">
+
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import Stats from 'stats';
+        import GUI from 'lil-gui';
+
+        //シーン
+        const scene = new THREE.Scene();
+
+        //カメラ
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
+        camera.position.z = 5;
+        scene.add(camera);
+
+        //軸ヘルパー
+        const axesHelper = new THREE.AxesHelper(2);
+        scene.add(axesHelper);
+
+        //Stats(モニター)
+        const stats = new Stats();
+        stats.showPanel(0);
+        document.body.appendChild(stats.dom);
+
+        //GUI
+        const gui = new GUI();
+
+
+        // テクスチャの読み込み
+        const texture = new THREE.TextureLoader().load("./textures/8.png");
+        const texture2 = new THREE.TextureLoader().load("./textures/4.png");
+
+        // オブジェクト
+        // 球
+        const sphere = new THREE.Points(
+            new THREE.OctahedronGeometry(1, 20, 1),
+            new THREE.PointsMaterial({
+                size: 0.08,
+                color: 0x3641bf,
+                alphaMap: texture2,   // テクスチャは読み込めない...?
+                transparent: true,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending,
+            })
+        );
+        scene.add(sphere);
+
+        // バッファジオメトリの追加。パーティクル
+        const bufferGeometry = new THREE.BufferGeometry();
+        const count = 2000;
+        const vertices = new Float32Array(count * 3);
+        const colors = new Float32Array(count * 3);   // 配列の追加
+
+        // ~追加~
+        const bufferGeometry2 = new THREE.BufferGeometry();
+        const count2 = 500;
+        const vertices2 = new Float32Array(count2 * 3);
+        const colors2 = new Float32Array(count2 * 3);
+
+
+        // for文でランダムな値を代入
+        for (let i = 0; i < count * 3; i++) {
+            vertices[i] = (Math.random() - 0.5) * 10; //変更
+            colors[i] = Math.random();   // ランダムな値を代入
+        }
+        console.log(vertices);
+
+        // ~追加~
+        for (let i = 0; i < count2 * 3; i++) {
+            vertices2[i] = (Math.random() - 0.5) * 5;
+            colors2[i] = Math.random();
+        }
+
+
+        // ジオメトリに組み込む
+        bufferGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+        bufferGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        // ~追加~
+        bufferGeometry2.setAttribute('position', new THREE.BufferAttribute(vertices2, 3));
+        bufferGeometry2.setAttribute('color', new THREE.BufferAttribute(colors2, 3));
+
+
+        // マテリアル
+        const pointsMaterial = new THREE.PointsMaterial({
+            size: 0.1,
+            sizeAttenuation: true,
+            vertexColors: true,
+            // color: 0x22ace3,
+            alphaMap: texture,
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+        })
+
+        // ~追加~
+        const pointsMaterial2 = new THREE.PointsMaterial({
+            size: 0.15,
+            sizeAttenuation: true,
+            vertexColors: true,
+            color: 0x22ace3,
+            alphaMap: texture,
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+        });
+
+
+        const particles = new THREE.Points(
+            bufferGeometry,
+            pointsMaterial
+        );
+        scene.add(particles);
+
+        // ~追加~
+        const particles2 = new THREE.Points(
+            bufferGeometry2,
+            pointsMaterial2
+        );
+        scene.add(particles2);
+
+
+        //追加
+        gui.add(pointsMaterial, 'size', 0.01, 0.5).name('パーティクルサイズ').step(0.01);
+
+
+        // オブジェクトの変更GUI
+        const guiMaterial = gui.addFolder("Material");
+        guiMaterial.addColor(particles.material, 'color');
+
+
+
+        //レンダラー
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        renderer.render(scene, camera);
+
+        //マウスコントロール
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+
+        const clock = new THREE.Clock();
+
+        //更新
+        const update = () => {
+            stats.begin();
+
+            // 経過時間を取得する
+            const elapsedTime = clock.getElapsedTime();
+            console.log(Math.sin(elapsedTime));
+
+            //座標の設定
+            for (let i = 0; i < count; i++) {
+                const i3 = i * 3;
+                const x = bufferGeometry.attributes.position.array[i3]; //追加
+                bufferGeometry.attributes.position.array[i3 + 1] = Math.sin(elapsedTime + x);
+            }
+
+            bufferGeometry.attributes.position.needsUpdate = true; //追加
+
+
+            // ~追加~
+            for (let i = 0; i < count2; i++) {
+                const i3 = i * 3;
+                const z = bufferGeometry2.attributes.position.array[i3 + 3];
+                bufferGeometry2.attributes.position.array[i3 + 1] = Math.cos(elapsedTime + z);
+            }
+
+            bufferGeometry2.attributes.position.needsUpdate = true;
+
+
+            renderer.render(scene, camera);
+            controls.update();
+            stats.end();
+            window.requestAnimationFrame(update);
+        };
+
+        //ウィンドウリサイズ
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        update();
+
+    </script>
+
+</body>
+
+</html>
