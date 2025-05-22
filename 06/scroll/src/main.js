@@ -50,14 +50,16 @@ gsap
     repeat: -1,
     repeatDelay: 2,
   })
-  .set(cube.position, { y: 3 })
+  .set(cube.position, { x: -2, y: 3 })
   .to(cube.position, { y: 0, duration: 0.8, ease: 'power1.in' })
   .to(cube.position, { y: 2, duration: 0.6, ease: 'power1.out' })
   .to(cube.position, { y: 0, duration: 0.6, ease: 'power1.in' })
   .to(cube.position, { y: 1, duration: 0.4, ease: 'power1.out' })
   .to(cube.position, { y: 0, duration: 0.4, ease: 'power1.in' })
   .to(cube.position, { y: 0.5, duration: 0.2, ease: 'power1.out' })
-  .to(cube.position, { y: 0, duration: 0.2, ease: 'power1.in' });
+  .to(cube.position, { y: 0, duration: 0.2, ease: 'power1.in' })
+  .to(cube.position, { x: 2, duration: 3.2, ease: 'none' }, 0)
+  .to(cube.rotation, { z: -Math.PI * 2, duration: 3.2, ease: 'none' }, 0);
 
 //更新
 const update = () => {
