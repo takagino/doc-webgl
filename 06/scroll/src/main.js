@@ -2,6 +2,8 @@ import './style.css';
 import * as THREE from 'three';
 import GUI from 'lil-gui';
 import Stats from 'stats-js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 
 //追加
 import { gsap } from 'gsap';
@@ -27,8 +29,8 @@ camera.position.z = 5;
 scene.add(camera);
 
 //軸ヘルパー
-const axesHelper = new THREE.AxesHelper(2);
-scene.add(axesHelper);
+// const axesHelper = new THREE.AxesHelper(2);
+// scene.add(axesHelper);
 
 //レンダラー
 const renderer = new THREE.WebGLRenderer();
@@ -36,30 +38,38 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 renderer.render(scene, camera);
 
+//周囲光
+const light = new THREE.AmbientLight(0xffffff, 5);
+scene.add(light);
+
 //オブジェクト
-const cube = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshNormalMaterial());
-scene.add(cube);
+const mtlLoader = new MTLLoader();
+mtlLoader.load('models/Panda/Panda.mtl', (materials) => {
+  materials.preload();
 
-gui.add(cube.rotation, 'x', 0, Math.PI * 2, 0.01).name('X軸回転');
-gui.add(cube.rotation, 'y', 0, Math.PI * 2, 0.01).name('Y軸回転');
-gui.add(cube.rotation, 'z', 0, Math.PI * 2, 0.01).name('Z軸回転');
+  const objLoader = new OBJLoader();
+  objLoader.setMaterials(materials);
+  objLoader.load('models/Panda/Panda.obj', (obj) => {
+    scene.add(obj);
+    obj.scale.set(0.2, 0.2, 0.2);
 
-//gsap
-gsap
-  .timeline({
-    repeat: -1,
-    repeatDelay: 2,
-  })
-  .set(cube.position, { x: -2, y: 3 })
-  .to(cube.position, { y: 0, duration: 0.8, ease: 'power1.in' })
-  .to(cube.position, { y: 2, duration: 0.6, ease: 'power1.out' })
-  .to(cube.position, { y: 0, duration: 0.6, ease: 'power1.in' })
-  .to(cube.position, { y: 1, duration: 0.4, ease: 'power1.out' })
-  .to(cube.position, { y: 0, duration: 0.4, ease: 'power1.in' })
-  .to(cube.position, { y: 0.5, duration: 0.2, ease: 'power1.out' })
-  .to(cube.position, { y: 0, duration: 0.2, ease: 'power1.in' })
-  .to(cube.position, { x: 2, duration: 3.2, ease: 'none' }, 0)
-  .to(cube.rotation, { z: -Math.PI * 2, duration: 3.2, ease: 'none' }, 0);
+    gsap
+      .timeline({
+        repeat: -1,
+        repeatDelay: 2,
+      })
+      .set(obj.position, { x: -2, y: 3 })
+      .to(obj.position, { y: 0, duration: 0.8, ease: 'power1.in' })
+      .to(obj.position, { y: 2, duration: 0.6, ease: 'power1.out' })
+      .to(obj.position, { y: 0, duration: 0.6, ease: 'power1.in' })
+      .to(obj.position, { y: 1, duration: 0.4, ease: 'power1.out' })
+      .to(obj.position, { y: 0, duration: 0.4, ease: 'power1.in' })
+      .to(obj.position, { y: 0.5, duration: 0.2, ease: 'power1.out' })
+      .to(obj.position, { y: 0, duration: 0.2, ease: 'power1.in' })
+      .to(obj.position, { x: 2, duration: 3.2, ease: 'none' }, 0)
+      .to(obj.rotation, { z: -Math.PI * 2, duration: 3.2, ease: 'none' }, 0);
+  });
+});
 
 //更新
 const update = () => {
