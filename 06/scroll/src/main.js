@@ -56,24 +56,43 @@ mtlLoader.load('models/Panda/Panda.mtl', (materials) => {
     gsap
       .timeline({
         scrollTrigger: {
-          trigger: '.trigger',
+          trigger: '#trigger01',
           start: 'top center',
           end: 'bottom center',
-          toggleActions: 'restart none none none',
+          toggleActions: 'play none none reverse',
           scrub: true,
           markers: true,
         },
       })
-      .set(obj.position, { x: -2, y: 3 })
-      .to(obj.position, { y: 0, duration: 0.8, ease: 'power1.in' })
-      .to(obj.position, { y: 2, duration: 0.6, ease: 'power1.out' })
-      .to(obj.position, { y: 0, duration: 0.6, ease: 'power1.in' })
-      .to(obj.position, { y: 1, duration: 0.4, ease: 'power1.out' })
-      .to(obj.position, { y: 0, duration: 0.4, ease: 'power1.in' })
-      .to(obj.position, { y: 0.5, duration: 0.2, ease: 'power1.out' })
-      .to(obj.position, { y: 0, duration: 0.2, ease: 'power1.in' })
-      .to(obj.position, { x: 2, duration: 3.2, ease: 'none' }, 0)
-      .to(obj.rotation, { z: -Math.PI * 2, duration: 3.2, ease: 'none' }, 0);
+      .to(obj.position, { z: 5 });
+
+    gsap
+      .timeline({
+        scrollTrigger: {
+          trigger: '#trigger02',
+          start: 'top center',
+          end: 'bottom center',
+          toggleActions: 'play none none reverse',
+          scrub: true,
+          markers: true,
+        },
+      })
+      .to(obj.position, { z: 0 })
+      .to(obj.rotation, { z: Math.PI * 2 }, '<');
+
+    gsap
+      .timeline({
+        scrollTrigger: {
+          trigger: '#trigger03',
+          start: 'top center',
+          end: 'bottom center',
+          toggleActions: 'play none none reverse',
+          scrub: true,
+          markers: true,
+        },
+      })
+      .to(obj.position, { y: -5, z: -10 })
+      .to(obj.scale, { x: 0, y: 0, z: 0 }, '<');
   });
 });
 
