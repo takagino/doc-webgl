@@ -55,8 +55,14 @@ mtlLoader.load('models/Panda/Panda.mtl', (materials) => {
 
     gsap
       .timeline({
-        repeat: -1,
-        repeatDelay: 2,
+        scrollTrigger: {
+          trigger: '.trigger',
+          start: 'top center',
+          end: 'bottom center',
+          toggleActions: 'restart none none none',
+          scrub: true,
+          markers: true,
+        },
       })
       .set(obj.position, { x: -2, y: 3 })
       .to(obj.position, { y: 0, duration: 0.8, ease: 'power1.in' })
