@@ -1,3 +1,8 @@
+//操作方法
+console.log('操作方法');
+console.log('1.矢印の上下左右で移動');
+console.log('2.スペースキーでジャンプ');
+
 import './style.css';
 import * as THREE from 'three';
 import GUI from 'lil-gui';
@@ -9,8 +14,6 @@ import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
-
-console.log(gsap);
 
 //UIデバッグ
 const gui = new GUI();
