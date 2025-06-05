@@ -81,13 +81,13 @@ scene.add(group);
 
 //テクスチャの読み込み
 const mtlLoader = new MTLLoader();
-mtlLoader.load('models/Panda/Panda.mtl', (materials) => {
+mtlLoader.load('models/carousel-3d-model/Carousel-bl.mtl', (materials) => {
   materials.preload();
 
   //OBJデータの読み込み
   const objLoader = new OBJLoader();
   objLoader.setMaterials(materials); //追加
-  objLoader.load('models/Panda/Panda.obj', (obj) => {
+  objLoader.load('models/carousel-3d-model/Carousel-bl.obj', (obj) => {
     group.add(obj);
 
     const scl = {
