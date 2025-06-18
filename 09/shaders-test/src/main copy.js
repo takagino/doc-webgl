@@ -13,7 +13,7 @@ const scene = new THREE.Scene();
 
 // カメラ
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
-camera.position.z = 2;
+camera.position.z = 5;
 scene.add(camera);
 
 // レンダラー
@@ -34,42 +34,42 @@ controls.enableDamping = true;
 ------------------------------ */
 
 // テクスチャ
-// const textureLoader = new THREE.TextureLoader();
-// const flagTexture = textureLoader.load('/textures/flag-french.jpg');
+const textureLoader = new THREE.TextureLoader();
+const flagTexture = textureLoader.load('/textures/flag-french.jpg');
 
 // ジオメトリ
 const geometry = new THREE.PlaneGeometry(1, 1, 32, 32);
 
-// const count = geometry.attributes.position.count;
-// const randoms = new Float32Array(count).map(() => Math.random());
-// geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1));
+const count = geometry.attributes.position.count;
+const randoms = new Float32Array(count).map(() => Math.random());
+geometry.setAttribute('aRandom', new THREE.BufferAttribute(randoms, 1));
 
-// // シェーダーのユニフォーム
-// const uniforms = {
-//   uFrequency: { value: new THREE.Vector2(10, 5) },
-//   uTime: { value: 0 },
-//   uColor: { value: new THREE.Color('orange') },
-//   uTexture: { value: flagTexture },
-// };
+// シェーダーのユニフォーム
+const uniforms = {
+  uFrequency: { value: new THREE.Vector2(10, 5) },
+  uTime: { value: 0 },
+  uColor: { value: new THREE.Color('orange') },
+  uTexture: { value: flagTexture },
+};
 
 // シェーダーマテリアル
 const material = new THREE.ShaderMaterial({
   vertexShader,
   fragmentShader,
-  // uniforms,
+  uniforms,
 });
 
 // メッシュの作成
 const mesh = new THREE.Mesh(geometry, material);
-// mesh.scale.y = 2 / 3;
+mesh.scale.y = 2 / 3;
 scene.add(mesh);
 
 /* ------------------------------
 GUIコントロール
 ------------------------------ */
 const gui = new GUI();
-// gui.add(material.uniforms.uFrequency.value, 'x').min(0).max(20).step(0.01).name('frequencyX');
-// gui.add(material.uniforms.uFrequency.value, 'y').min(0).max(20).step(0.01).name('frequencyY');
+gui.add(material.uniforms.uFrequency.value, 'x').min(0).max(20).step(0.01).name('frequencyX');
+gui.add(material.uniforms.uFrequency.value, 'y').min(0).max(20).step(0.01).name('frequencyY');
 
 /* ------------------------------
 更新
@@ -77,7 +77,7 @@ const gui = new GUI();
 const clock = new THREE.Clock();
 
 const update = () => {
-  // material.uniforms.uTime.value = clock.getElapsedTime();
+  material.uniforms.uTime.value = clock.getElapsedTime();
 
   controls.update();
   renderer.render(scene, camera);

@@ -225,3 +225,40 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+window.addEventListener('click', (event) => {
+  // スクリーン座標を -1〜1 に変換
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+
+  // 全オブジェクトを対象に交差判定
+  const allMeshes = [
+    ...objects.map((o) => o.mesh),
+    ...spheres.map((s) => s.mesh),
+    ...boxes.map((b) => b.mesh),
+  ];
+
+  const intersects = raycaster.intersectObjects(allMeshes);
+
+  if (intersects.length > 0) {
+    const hit = intersects[0].object;
+
+    // メッシュの色を変更
+    if (hit.material && hit.material.color) {
+      hit.material.color.set(0x00ffff); // シアン色に変更
+    }
+
+    // 物理オブジェクトに力を加える
+    const target = [...objects, ...spheres, ...boxes].find((o) => o.mesh === hit);
+
+    if (target) {
+      const force = new CANNON.Vec3(0, 5, 0); // 上に向かって力を加える
+      target.body.applyImpulse(force, target.body.position);
+    }
+  }
+});
