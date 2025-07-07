@@ -74,11 +74,11 @@ world.addContactMaterial(plasticPlasticContactMaterial);
 
 const createObj = (x, y, z) => {
   const mtlLoader = new MTLLoader();
-  mtlLoader.load('models/Panda/Panda.mtl', (materials) => {
+  mtlLoader.load('models/kuma/kuma.mtl', (materials) => {
     materials.preload();
     const objLoader = new OBJLoader();
     objLoader.setMaterials(materials);
-    objLoader.load('models/Panda/Panda.obj', (object) => {
+    objLoader.load('models/kuma/kuma.obj', (object) => {
       object.position.set(x, y, z);
       object.scale.set(0.5, 0.5, 0.5);
       scene.add(object);
