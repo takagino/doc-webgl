@@ -22,7 +22,7 @@ camera.position.z = 5;
 scene.add(camera);
 
 //周囲光
-const light = new THREE.AmbientLight(0xffffff, 1);
+const light = new THREE.AmbientLight(0xffffff, 5);
 scene.add(light);
 
 //軸ヘルパー
