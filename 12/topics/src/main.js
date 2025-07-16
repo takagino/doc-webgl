@@ -51,16 +51,55 @@ renderer.render(scene, camera);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
+// 球体
+const sphere = new THREE.Mesh(
+  new THREE.SphereGeometry(1, 64, 64),
+  new THREE.MeshStandardMaterial({
+    metalness: 1,
+    roughness: 0,
+    envMap: environmentMap,
+  })
+);
+sphere.name = `Sphere`; // 名前を設定
+scene.add(sphere);
+
+const materialFolder = gui.addFolder('Material Settings');
+materialFolder.add(sphere.material, 'metalness', 0, 1, 0.01);
+materialFolder.add(sphere.material, 'roughness', 0, 1, 0.01);
+
 //ドラッグコントロール
-const draggableObjects = []; //変更
+const draggableObjects = [sphere];
 const dragControls = new DragControls(draggableObjects, camera, renderer.domElement);
 
 dragControls.addEventListener('dragstart', (event) => (controls.enabled = false));
 dragControls.addEventListener('dragend', () => (controls.enabled = true));
 
+// 箱100個
+for (let i = 0; i < 100; i++) {
+  const box = new THREE.Mesh(
+    new THREE.BoxGeometry(0.5, 0.5, 0.5),
+    new THREE.MeshStandardMaterial({
+      metalness: 1,
+      roughness: 0,
+      envMap: environmentMap,
+    })
+  );
+  box.name = `Box ${i}`; // 名前を設定
+  box.position.set(
+    (Math.random() - 0.5) * 10,
+    (Math.random() - 0.5) * 5,
+    (Math.random() - 0.5) * 10
+  );
+  scene.add(box);
+  draggableObjects.push(box);
+}
+
 // レイキャスター
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
+
+// HTML 要素
+const info = document.getElementById('info');
 
 window.addEventListener('click', (event) => {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -71,13 +110,7 @@ window.addEventListener('click', (event) => {
   intersects.forEach((intersect) => {
     if (intersect.object.isMesh) {
       const target = intersect.object;
-      scene.remove(target);
-
-      const index = draggableObjects.indexOf(target);
-      if (index > -1) draggableObjects.splice(index, 1);
-
-      if (target.geometry) target.geometry.dispose();
-      if (target.material) target.material.dispose();
+      info.textContent = `${target.name} がクリックされました`;
     }
   });
 });
