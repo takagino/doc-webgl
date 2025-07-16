@@ -98,18 +98,20 @@ for (let i = 0; i < 100; i++) {
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
-// HTML 要素
+// 要素の取得
 const info = document.getElementById('info');
 
 window.addEventListener('click', (event) => {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObjects(draggableObjects, true);
+  const intersects = raycaster.intersectObjects(draggableObjects, true); // 変更
 
   intersects.forEach((intersect) => {
     if (intersect.object.isMesh) {
       const target = intersect.object;
+
+      //変更
       info.textContent = `${target.name} がクリックされました`;
     }
   });
