@@ -51,45 +51,50 @@ renderer.render(scene, camera);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
-// 球体
-const sphere = new THREE.Mesh(
-  new THREE.SphereGeometry(1, 64, 64),
-  new THREE.MeshStandardMaterial({
-    metalness: 1,
-    roughness: 0,
-    envMap: environmentMap,
-  })
-);
-sphere.name = `Sphere`; // 名前を設定
-scene.add(sphere);
-
-const materialFolder = gui.addFolder('Material Settings');
-materialFolder.add(sphere.material, 'metalness', 0, 1, 0.01);
-materialFolder.add(sphere.material, 'roughness', 0, 1, 0.01);
-
 //ドラッグコントロール
-const draggableObjects = [sphere];
+const draggableObjects = [];
 const dragControls = new DragControls(draggableObjects, camera, renderer.domElement);
 
 dragControls.addEventListener('dragstart', (event) => (controls.enabled = false));
 dragControls.addEventListener('dragend', () => (controls.enabled = true));
 
-// 箱100個
-for (let i = 0; i < 100; i++) {
-  const box = new THREE.Mesh(
-    new THREE.BoxGeometry(0.5, 0.5, 0.5),
-    new THREE.MeshStandardMaterial({
-      metalness: 1,
-      roughness: 0,
-      envMap: environmentMap,
-    })
-  );
-  box.name = `Box ${i}`; // 名前を設定
+function createNumberTexture(number) {
+  const size = 128;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  // 背景
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, size, size);
+
+  // 数字
+  ctx.fillStyle = '#000000';
+  ctx.font = 'bold 64px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(number, size / 2, size / 2);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  return texture;
+}
+
+let expectedNumber = 1;
+
+for (let i = 1; i <= 50; i++) {
+  const texture = createNumberTexture(i);
+  const material = new THREE.MeshBasicMaterial({ map: texture });
+  const box = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
+
+  // ランダムに配置（例）
   box.position.set(
+    (Math.random() - 0.5) * 30,
     (Math.random() - 0.5) * 10,
-    (Math.random() - 0.5) * 5,
-    (Math.random() - 0.5) * 10
+    (Math.random() - 0.5) * 30
   );
+  box.number = i;
+
   scene.add(box);
   draggableObjects.push(box);
 }
@@ -110,9 +115,17 @@ window.addEventListener('click', (event) => {
   intersects.forEach((intersect) => {
     if (intersect.object.isMesh) {
       const target = intersect.object;
+      const clickedNumber = target.number;
 
-      //変更
-      info.textContent = `${target.name} がクリックされました`;
+      if (clickedNumber === expectedNumber) {
+        target.material.color.set(0x00ff00); // 正解 → 緑
+        info.textContent = `${target.number} がクリックされました`;
+        expectedNumber++;
+
+        if (expectedNumber >= 50) {
+          info.textContent = '全ての数字をクリックしました！';
+        }
+      }
     }
   });
 });
