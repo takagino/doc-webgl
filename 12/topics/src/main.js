@@ -82,22 +82,21 @@ function createNumberTexture(number) {
 
 let expectedNumber = 1;
 
-for (let i = 1; i <= 50; i++) {
-  const texture = createNumberTexture(i);
-  const material = new THREE.MeshBasicMaterial({ map: texture });
-  const box = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
+const texture = createNumberTexture(1);
+const box = new THREE.Mesh(
+  new THREE.BoxGeometry(1, 1, 1),
+  new THREE.MeshBasicMaterial({ map: texture })
+);
 
-  // ランダムに配置（例）
-  box.position.set(
-    (Math.random() - 0.5) * 30,
-    (Math.random() - 0.5) * 10,
-    (Math.random() - 0.5) * 30
-  );
-  box.number = i;
+box.position.set(
+  (Math.random() - 0.5) * 30,
+  (Math.random() - 0.5) * 10,
+  (Math.random() - 0.5) * 30
+);
+box.name = 1;
 
-  scene.add(box);
-  draggableObjects.push(box);
-}
+scene.add(box);
+draggableObjects.push(box);
 
 // レイキャスター
 const raycaster = new THREE.Raycaster();
@@ -115,14 +114,14 @@ window.addEventListener('click', (event) => {
   intersects.forEach((intersect) => {
     if (intersect.object.isMesh) {
       const target = intersect.object;
-      const clickedNumber = target.number;
+      const clickedNumber = target.name;
 
       if (clickedNumber === expectedNumber) {
         target.material.color.set(0x00ff00); // 正解 → 緑
-        info.textContent = `${target.number} がクリックされました`;
+        info.textContent = `${target.name} がクリックされました`;
         expectedNumber++;
 
-        if (expectedNumber >= 50) {
+        if (expectedNumber >= draggableObjects.length + 1) {
           info.textContent = '全ての数字をクリックしました！';
         }
       }
