@@ -1,26 +1,27 @@
 import './style.css';
-import * as THREE from 'three';
+import * as THREE from "three";
 import GUI from 'lil-gui';
 import Stats from 'stats-js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { DragControls } from 'three/examples/jsm/controls/DragControls.js';
 
-//UIデバッグ
+// UIデバッグ
 const gui = new GUI();
 
-//FPSデバッグ
+// FPSデバッグ
 const stats = new Stats();
 stats.showPanel(0);
 document.body.appendChild(stats.dom);
 
-//シーン
+// シーン
 const scene = new THREE.Scene();
 
-//カメラ
+// カメラ
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight);
 camera.position.z = 5;
 scene.add(camera);
 
+// 環境マップの読み込み
 const loader = new THREE.CubeTextureLoader();
 const environmentMap = loader.load([
   'textures/cube/posx.jpg', // 右面
@@ -33,30 +34,29 @@ const environmentMap = loader.load([
 
 scene.background = environmentMap;
 
-//周囲光
+// 周囲光
 const light = new THREE.AmbientLight(0xffffff, 5);
 scene.add(light);
 
-//軸ヘルパー
+// 軸ヘルパー
 const axesHelper = new THREE.AxesHelper(2);
 scene.add(axesHelper);
 
-//レンダラー
+// レンダラー
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 renderer.render(scene, camera);
 
-//コントロール
+// コントロール
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
-//ドラッグコントロール
 const draggableObjects = [];
 const dragControls = new DragControls(draggableObjects, camera, renderer.domElement);
 
-dragControls.addEventListener('dragstart', (event) => (controls.enabled = false));
-dragControls.addEventListener('dragend', () => (controls.enabled = true));
+dragControls.addEventListener('dragstart', () => controls.enabled = false);
+dragControls.addEventListener('dragend', () => controls.enabled = true);
 
 function createNumberTexture(number) {
   const size = 128;
@@ -80,56 +80,57 @@ function createNumberTexture(number) {
   return texture;
 }
 
-let expectedNumber = 1;
+const limit = 25;
 
-const texture = createNumberTexture(1);
-const box = new THREE.Mesh(
-  new THREE.BoxGeometry(1, 1, 1),
-  new THREE.MeshBasicMaterial({ map: texture })
-);
+for (let i = 1; i <= limit; i++) {
+  const texture = createNumberTexture(i);
+  const box = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.MeshBasicMaterial({ map: texture })
+  );
 
-box.position.set(
-  (Math.random() - 0.5) * 30,
-  (Math.random() - 0.5) * 10,
-  (Math.random() - 0.5) * 30
-);
-box.name = 1;
+  box.position.set(
+    (Math.random() - 0.5) * 30,
+    (Math.random() - 0.5) * 10,
+    (Math.random() - 0.5) * 30
+  );
+  box.name = i;
 
-scene.add(box);
-draggableObjects.push(box);
+  scene.add(box);
+  draggableObjects.push(box);
+}
 
-// レイキャスター
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
-// 要素の取得
 const info = document.getElementById('info');
+
+let currentNumber = 1;
 
 window.addEventListener('click', (event) => {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
   raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObjects(draggableObjects, true); // 変更
+  const intersects = raycaster.intersectObjects(draggableObjects, true);
+  console.log(intersects);
 
-  intersects.forEach((intersect) => {
-    if (intersect.object.isMesh) {
-      const target = intersect.object;
-      const clickedNumber = target.name;
-
-      if (clickedNumber === expectedNumber) {
-        target.material.color.set(0x00ff00); // 正解 → 緑
-        info.textContent = `${target.name} がクリックされました`;
-        expectedNumber++;
-
-        if (expectedNumber >= draggableObjects.length + 1) {
-          info.textContent = '全ての数字をクリックしました！';
+  intersects.forEach((i) => {
+    console.log(i);
+    if (i.object.isMesh) {
+      if (currentNumber == i.object.name) {
+        i.object.material.color.set(0xff0000);
+        info.textContent = `${i.object.name}がクリックされました。`;
+        currentNumber++;
+        if (currentNumber > limit) {
+          info.textContent = `クリア！`;
         }
       }
     }
-  });
+  })
 });
 
-//更新
+// 更新
 const update = () => {
   stats.begin();
   renderer.render(scene, camera);
@@ -140,7 +141,7 @@ const update = () => {
 
 update();
 
-//ウィンドウリサイズ
+// ウィンドウリサイズ
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
