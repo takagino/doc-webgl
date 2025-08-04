@@ -65,7 +65,7 @@ let player; // update関数内でも使用するた予め宣言しておく
 const gltfLoader = new GLTFLoader();
 const collectibles = [];
 
-gltfLoader.load('/models/bear.gltf', (gltf) => {
+gltfLoader.load('models/bear.gltf', (gltf) => {
   player = gltf.scene;
   player.scale.set(0.5, 0.5, 0.5);
   player.position.set(0, 1, 0);
@@ -76,7 +76,7 @@ gltfLoader.load('/models/bear.gltf', (gltf) => {
     const x = (Math.random() - 0.5) * 16; // -8〜8
     const z = (Math.random() - 0.5) * 16;
 
-    gltfLoader.load('/models/fish.gltf', (gltf) => {
+    gltfLoader.load('models/fish.gltf', (gltf) => {
       const item = gltf.scene;
       item.scale.set(0.5, 0.5, 0.5);
       item.position.set(x, 0.4, z);
